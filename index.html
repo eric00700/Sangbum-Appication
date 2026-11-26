@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sangbum App</title>
+<meta name="theme-color" content="#0c1020">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Sangbum">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<style>
+:root{--bg:#0c1020;--card:#171d36;--card2:#10162d;--chip:#222a4d;--line:#2a3358;--ink:#eef1fb;--mut:#8f9abf;--acc:#ffb524;--accink:#241500;--cy:#35d6cf;--red:#ff5a4d;--ok:#3ddc97;--num:"Chakra Petch","Noto Sans KR",sans-serif}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;color:var(--ink);font:14px/1.55 "Noto Sans KR","Pretendard","Malgun Gothic",sans-serif;-webkit-font-smoothing:antialiased;
+ background:radial-gradient(900px 520px at 12% -8%,#2b1a5c66,transparent 70%),radial-gradient(800px 520px at 105% 0,#0d3d4c77,transparent 70%),#070a15;background-attachment:fixed}
+#app{max-width:480px;min-height:100vh;margin:0 auto;background:linear-gradient(180deg,#0f1530,#0a0e20 360px);padding-bottom:92px;position:relative;box-shadow:0 0 0 1px #ffffff12,0 30px 90px #000a}
+header{position:sticky;top:0;z-index:10;display:flex;gap:12px;align-items:center;padding:14px 16px;background:#0a0e20d9;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.logo{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#ffd166,#ff8a00);color:var(--accink);font:700 26px var(--num);box-shadow:0 0 20px #ffa40066,inset 0 -3px 0 #0002}
+header h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-.2px}
+header p{margin:2px 0 0;font-size:11.5px;color:var(--mut)}
+.tab{display:none;padding:16px}.tab.on{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:linear-gradient(180deg,var(--card),#141a31);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 10px 28px #0005}
+.card h2{margin:0 0 12px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";flex:none;width:4px;height:15px;border-radius:2px;background:linear-gradient(180deg,#ffd166,#ff8a00)}
+.card h3{color:var(--cy)}
+video,canvas.snap{width:100%;border-radius:14px;background:#05070f;display:block;border:1px solid var(--line)}
+#camOff{border:1px dashed #3a4573;border-radius:14px;background:#0d1226;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;font-size:14px;font-weight:500;min-height:42px;padding:9px 16px;border-radius:12px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer;transition:transform .08s,filter .15s}
+button:hover{filter:brightness(1.15)}button:active{transform:scale(.97)}
+button.p{background:linear-gradient(180deg,#ffc84a,#ffa400);border:0;color:var(--accink);font-weight:700;box-shadow:0 6px 20px #ffa40033}
+button.d{color:#ff8c80;border-color:#5b2a33;background:#2a1a24}
+button.on{background:#3a1520;color:#ff8c80;border-color:var(--red)}
+#autoBtn.d{background:#3a1520;color:#ffb3a8;border:1px solid var(--red);box-shadow:none;animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #ff5a4d66}70%{box-shadow:0 0 0 10px #ff5a4d00}100%{box-shadow:0 0 0 0 #ff5a4d00}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:12px;color:var(--mut);display:block;font-weight:500}
+input,select,textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;margin-top:4px;background:#0c1126;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px #ffb52430}
+input[type=file]{padding:8px}input[type=file]::file-selector-button{margin-right:10px;border:0;border-radius:8px;padding:6px 10px;background:var(--chip);color:var(--ink);cursor:pointer}
+input[type=checkbox]{accent-color:var(--acc)}
+.status{font-size:12px;color:var(--cy);margin-top:10px;padding:8px 10px;border-radius:10px;background:#0c1126;border:1px solid var(--line)}
+.note{font-size:12px;color:var(--mut);line-height:1.6}
+a{color:var(--cy)}
+.tr{border-left:3px solid var(--cy);background:var(--card2);border-radius:0 12px 12px 0;padding:8px 12px;margin:8px 0;font-size:13px}
+.tr .ja{color:var(--mut);font-size:12px}.tr .ko{font-weight:700;color:var(--ink)}
+#ranking{counter-reset:r}
+.rank{counter-increment:r;display:flex;gap:11px;align-items:center;padding:12px;margin-bottom:9px;background:var(--card2);border:1px solid var(--line);border-radius:15px}
+.rank::before{content:counter(r);flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--num);background:var(--chip);color:var(--mut)}
+.rank.top{border-color:#ffb52466;background:linear-gradient(90deg,#ffb5241c,var(--card2) 60%)}
+.rank.top::before{background:linear-gradient(145deg,#ffd166,#ff8a00);color:var(--accink)}
+.rank .no{flex:none;min-width:48px;height:46px;padding:0 6px;border-radius:12px;background:var(--chip);color:var(--ink);display:grid;place-items:center;font:700 19px var(--num)}
+.rank.top .no{background:#0c2b33;color:var(--cy);box-shadow:inset 0 0 0 1px #35d6cf55}
+.rank .b{flex:1;min-width:0;font-size:12.5px;color:var(--mut)}.rank .b b{font-size:14px;color:var(--ink)}
+.score{text-align:right;font-size:11px;color:var(--mut)}.score strong{display:block;font:700 26px/1 var(--num);color:var(--acc)}
+.bar{height:6px;background:var(--chip);border-radius:3px;margin:6px 0 3px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--cy),var(--ok));border-radius:3px}
+.warn{background:linear-gradient(180deg,#2c1a24,#241621);border-color:#5b2a33}.warn .note{color:#ffb9ae}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+td,th{padding:8px 4px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+tr:first-child td{border-top:0}td:first-child{color:var(--mut);width:46%}
+details{margin-top:12px}summary{cursor:pointer;padding:8px 0}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:20;display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:#0a0e20e6;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line)}
+nav button{flex:1;min-width:0;min-height:54px;border:0;border-radius:12px;padding:6px 0 4px;background:transparent;color:#6f7aa3;font-size:10px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--acc);background:#ffb52414;font-weight:700}
+nav button.on::after{content:"";position:absolute;top:-7px;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--acc);box-shadow:0 0 12px var(--acc)}
+
+#t8{padding:8px}
+.cvwrap{display:flex;flex-direction:column;height:calc(100dvh - 168px);min-height:560px;gap:6px}
+.cvp{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;background:var(--card2);overflow:hidden}
+.cvp.flip{transform:rotate(180deg)}
+.cvh{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;font-weight:700;font-size:13px;background:#0c1126;border-bottom:1px solid var(--line)}
+.cvh i{font-style:normal;font:700 11px var(--num);padding:2px 7px;border-radius:6px;background:var(--acc);color:var(--accink);margin-right:6px}
+.cvm{flex:1;min-height:0;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:88%;padding:8px 12px;border-radius:14px;background:var(--chip);align-self:flex-start}
+.bub.me{align-self:flex-end;background:#3a2c0a;border:1px solid #ffb52455}
+.bub .big{font-size:16px;font-weight:700;line-height:1.45}.bub .sm{font-size:11.5px;color:var(--mut);margin-top:3px}
+.cvi{font-size:13px;color:var(--cy);min-height:18px;padding:0 12px}
+.cvc{display:flex;gap:6px;overflow-x:auto;padding:4px 10px 6px}
+.cvc button{white-space:nowrap;min-height:32px;padding:4px 11px;font-size:12px;border-radius:999px;flex:none}
+.cvin{display:flex;gap:6px;padding:4px 10px 10px;align-items:center}
+.cvin textarea{flex:1;margin:0;resize:none;height:46px;padding:10px}
+.cvin .p{height:46px}
+.mic{flex:none;width:48px;height:48px;min-height:48px;border-radius:50%;padding:0;display:grid;place-items:center;background:var(--chip)}
+.mic.rec{background:var(--red);color:#fff;border-color:var(--red);animation:pulse 1.4s infinite}
+.cvbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:11.5px;color:var(--mut);padding:2px 4px}
+.cvbar button{min-height:30px;padding:3px 10px;font-size:12px}.cvbar input{width:auto;margin:0 4px 0 0;vertical-align:middle}
+#cv_go.d{background:#3a1520;color:#ffb3a8;border:1px solid var(--red);box-shadow:none;animation:pulse 1.6s infinite}
+.cvh .on{color:var(--red);font-weight:700}
+
+header{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.back{flex:none;width:38px;height:38px;min-height:38px;padding:0;border-radius:12px;display:none;place-items:center}
+body[data-page="home"] .tab{display:none!important}
+#home{display:none;padding:18px 16px}
+body[data-page="home"] #home{display:block;animation:in .25s ease}
+body:not([data-page="game"]) nav{display:none}
+body:not([data-page="game"]) #app{padding-bottom:28px}
+.cvwrap{height:calc(100dvh - 118px)!important}
+.tile{display:flex;align-items:center;gap:15px;width:100%;text-align:left;padding:18px 16px;margin-bottom:13px;min-height:108px;border-radius:22px;border:1px solid color-mix(in srgb,var(--tc) 45%,transparent);background:linear-gradient(120deg,color-mix(in srgb,var(--tc) 16%,#151b34),#121830 70%);box-shadow:0 12px 30px #0006;color:var(--ink)}
+.tile .tn{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font:700 28px var(--num);background:var(--tc);color:#101020;box-shadow:0 0 22px color-mix(in srgb,var(--tc) 55%,transparent)}
+.tile .tb{flex:1;display:flex;flex-direction:column;gap:3px}.tile .tb b{font-size:19px;font-weight:700}.tile .tb small{font-size:12.5px;color:var(--mut);line-height:1.5}
+.tile svg{flex:none;color:var(--tc)}
+.seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1;padding:8px 4px;font-size:13px}
+.seg button.on2{background:linear-gradient(180deg,#ffc84a,#ffa400);border:0;color:var(--accink);font-weight:700}
+</style>
+</head>
+<body data-page="home">
+<div id="app">
+<header><button class="back" id="backBtn" aria-label="홈으로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="logo">S</div><div><h1>Sangbum App</h1><p id="hSub">통역 · 음식점 · 게임</p></div></header>
+<section id="home">
+ <p class="note" style="margin:2px 2px 14px">원하는 메뉴를 선택하세요</p>
+ <button class="tile" style="--tc:#35d6cf" data-go="chat"><span class="tn">1</span><span class="tb"><b>실시간 대화</b><small>일본어 · 영어 · 중국어 ↔ 한국어<br>시작만 누르면 자동으로 통역합니다</small></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+ <button class="tile" style="--tc:#ffb524" data-go="food"><span class="tn">2</span><span class="tb"><b>음식점</b><small>일본 · 태국 · 중국 음식<br>메뉴판 사진 번역과 용어 도움말</small></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+ <button class="tile" style="--tc:#ff6b8a" data-go="game"><span class="tn">3</span><span class="tb"><b>게임</b><small>파칭코 데이터 분석<br>자동 입력 · 카운터 · 그래프 · 번역</small></span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+ <button class="p" id="installBtn" style="display:none;width:100%;margin-top:4px">홈 화면에 앱 설치</button>
+ <p class="note" style="margin-top:14px">폰에 설치하려면 Chrome 메뉴(⋮)에서 「앱 설치」, iPhone은 Safari 공유 버튼에서 「홈 화면에 추가」를 누르세요.</p>
+</section>
+
+<!-- 촬영 -->
+<section class="tab" id="t0">
+ <div class="card"><h2>자동 입력</h2>
+  <p class="note">시작을 누르고 데이터 카운터나 그래프 화면을 비추기만 하면 화면 종류를 알아보고, 값을 읽어 채우고, 저장까지 합니다.</p>
+  <div class="row"><button class="p" id="autoBtn">자동 입력 시작</button><button id="undoBtn">마지막 자동 저장 취소</button></div>
+  <label style="margin-top:10px"><input type="checkbox" id="a_save" checked style="width:auto;margin:0 6px 0 0">읽은 값을 자동 저장</label>
+  <div class="g2" style="margin-top:8px;align-items:end"><label>현재 기계 번호 (자동 인식, 틀리면 수정)<input id="a_no" inputmode="numeric"></label><button id="nextBtn">다음 기계로</button></div>
+  <div class="status" id="aStat">대기 중</div><div id="aGraph" class="note"></div>
+  <p class="note">같은 값이 두 번 이상 연속으로 읽혀야 채워서 인식 오류를 줄입니다. 1,000엔당 회전수는 화면에 나오지 않아 자동으로 입력되지 않습니다.</p>
+ </div>
+ <div class="card">
+  <h2>카메라</h2>
+  <video id="vid" playsinline muted style="display:none"></video>
+  <canvas id="snap" class="snap" style="display:none"></canvas>
+  <div id="camOff" class="note" style="padding:24px 0;text-align:center">카메라가 꺼져 있습니다.</div>
+  <div class="row">
+   <button class="p" id="camBtn">카메라 켜기</button>
+   <button id="shotBtn">촬영·인식</button>
+   <button id="liveBtn">실시간 번역 끔</button>
+  </div>
+  <div class="row"><label style="width:100%">또는 사진 파일로 테스트<input type="file" id="file" accept="image/*"></label></div>
+  <div class="status" id="st">대기 중</div>
+ </div>
+ <div class="card"><h2>원문과 한국어 번역</h2><div id="trOut" class="note">인식 결과가 여기에 표시됩니다.</div></div>
+ <div class="card"><h2>인식 결과 확인 후 저장</h2>
+  <div class="g2">
+   <label>기계 번호<input id="f_no" inputmode="numeric"></label>
+   <label>기종명<input id="f_name"></label>
+   <label>현재 회전수<input id="f_spins" inputmode="numeric"></label>
+   <label>당일 당첨 횟수<input id="f_today" inputmode="numeric"></label>
+   <label>전일 당첨 횟수<input id="f_prev" inputmode="numeric"></label>
+   <label>당첨 확률 (1/○)<input id="f_prob" inputmode="decimal"></label>
+   <label>투입 금액(엔)<input id="f_yen" inputmode="numeric"></label>
+   <label>그 금액으로 돈 회전수<input id="f_ys" inputmode="numeric"></label>
+   <label>과거 최고 대당 횟수<input id="f_rec" inputmode="numeric"></label>
+   <label>최고 출옥(구슬)<input id="f_ball" inputmode="numeric"></label>
+  </div>
+  <label style="margin-top:8px">최근 당첨 이력 (당첨 간 회전수, 쉼표로 구분)<input id="f_hist" placeholder="예: 312, 88, 540"></label>
+  <div class="row"><button class="p" id="saveBtn">저장</button><button id="clrBtn">입력 비우기</button></div>
+  <p class="note">투입 금액과 그 금액으로 돈 회전수를 직접 재서 넣으면 1,000엔당 회전수를 계산합니다. 화면에서 읽을 수 없는 값이라 직접 입력이 가장 정확합니다.</p>
+ </div>
+</section>
+
+<!-- 기계 -->
+<section class="tab" id="t1"><div id="machines"></div></section>
+
+<!-- 순위 -->
+<section class="tab" id="t2">
+ <div class="card"><h2>유리한 기계 순위</h2><div id="ranking" class="note">저장된 기계가 없습니다.</div></div>
+ <div class="card warn"><div class="note" style="color:inherit">점수는 1,000엔당 회전수(60%), 당첨 빈도(25%), 데이터 신뢰도(15%)로 계산한 참고값입니다. 파칭코의 당첨은 추첨이라 누적 데이터로 당첨 확률 자체를 높일 수는 없습니다. 이 앱이 하는 일은 같은 돈으로 더 많이 돌릴 수 있는 기계를 가려내는 것까지입니다.</div></div>
+</section>
+
+<!-- 번역·사전 -->
+<section class="tab" id="t3">
+ <div class="card"><h2>일본어 → 한국어 번역</h2>
+  <textarea id="trIn" rows="4" placeholder="일본어 안내문, 게임 설명, 주의사항을 붙여넣으세요"></textarea>
+  <div class="row"><button class="p" id="trBtn">번역</button></div>
+  <div id="trMan"></div>
+  <label style="margin-top:10px">Google Cloud Translation API 키 (선택)<input id="apiKey" type="password" placeholder="없으면 내장 용어 사전만 사용"></label>
+  <p class="note">구글 번역 앱 자체는 다른 프로그램이 호출할 수 없어서, 앱 대신 같은 엔진인 Cloud Translation API를 씁니다. 키가 없으면 아래 용어 사전으로 번역하고, 문장 전체 번역이 필요하면 <a href="https://translate.google.com/?sl=ja&tl=ko" target="_blank">구글 번역 열기</a>를 이용하세요.</p>
+ </div>
+ <div class="card"><h2>파칭코 용어 사전</h2><input id="dq" placeholder="일본어 또는 한국어로 검색"><table id="dict"></table></div>
+</section>
+
+<!-- 설정화면 -->
+<section class="tab" id="t4">
+ <div class="card"><h2>게임성 커스터마이즈 (ゲーム性カスタマイズ)</h2>
+  <p class="note">기계 설정 메뉴 화면의 항목과 선택지입니다. 원문 아래에 한국어를 표시합니다. 이 메뉴는 일반적으로 연출 표시 방식을 바꾸는 설정이며, 당첨 확률 자체와는 별개입니다.</p>
+  <div id="setList"></div>
+  <p class="note">「エアーの出現率がアップします」→ 에어(연출)의 출현율이 올라갑니다.<br>조작 안내: カーソル移動 → 커서 이동 / 決定 → 결정</p>
+ </div>
+ <div class="card"><h2>이 기계의 설정 기록</h2>
+  <label>기계 번호<input id="c_no" inputmode="numeric"></label>
+  <div id="setForm" class="g2" style="margin-top:8px"></div>
+  <div class="row"><button class="p" id="cfgSave">설정 저장</button><button id="cfgYak">이 사진 값 채우기(선역물 낙하=끔)</button></div>
+  <p class="note">저장한 설정은 기계 탭의 해당 기계 카드에 표시됩니다.</p>
+ </div>
+</section>
+
+<!-- 카운터 해설 -->
+<section class="tab" id="t5">
+ <div class="card"><h2>데이터 카운터 화면 해설</h2>
+  <p class="note">기계 위쪽 데이터 카운터(사이드 디스플레이)의 항목입니다. 사진 속 기계(엑스 에반게리온 계열 CR기, 기계 번호 310)를 기준으로 읽었습니다.</p>
+  <div id="ctrList"></div>
+  <div class="row"><button class="p" id="sampleBtn">이 사진의 값 채우기 (테스트용)</button></div>
+  <p class="note">촬영 탭 입력칸이 채워집니다. 확인 후 저장하면 기계·순위 탭이 어떻게 보이는지 바로 테스트할 수 있습니다.</p>
+ </div>
+ <div class="card"><h2>일별 그래프 화면 (日別グラフ)</h2>
+  <p class="note">왼쪽 종합 데이터와 오른쪽 일별 그래프가 한 화면에 나오는 형식입니다.</p>
+  <div id="ctrList2"></div>
+  <p class="note">계산: 대당 ÷ 초당 = 1일 전 19÷13 ≈ 1.46, 2일 전 7÷5 = 1.4 (초당 1회당 평균 대당 수. 연속이 길수록 커집니다)</p>
+  <div class="row"><button class="p" id="sample2Btn">이 사진의 값 채우기 (테스트용)</button></div>
+ </div>
+ <div class="card warn"><div class="note" style="color:inherit">큰 빨간 7세그먼트 숫자(오늘 대당 횟수, 스타트)는 OCR이 가장 많이 틀리는 부분입니다. 숫자는 저장 전에 화면과 꼭 대조하세요. 카운터 전체가 프레임에 꽉 차도록, 빛 반사가 없는 각도로 찍으면 인식률이 올라갑니다.</div></div>
+</section>
+
+<!-- 그래프 -->
+<section class="tab" id="t6">
+ <div class="card"><h2>연속 그래프 분석 (連続グラフ)</h2>
+  <p class="note">선 색으로 구분합니다. 빨강 = 오늘(本日), 노랑 = 1일 전, 초록 = 2일 전, 보라 = 연속 당첨으로 크게 오른 구간(ラッキートリガー). 세로축은 출옥(획득 구슬) 누적입니다.</p>
+  <label>그래프 종류<select id="g_mode"><option value="seq">연속 그래프 (連続グラフ)</option><option value="cmp">비교 그래프 (比較グラフ, 시간축)</option><option value="day">일별 그래프 (日別グラフ)</option></select></label>
+  <div class="row"><label style="width:100%">그래프 화면 사진<input type="file" id="gFile" accept="image/*"></label></div>
+  <div class="row"><button class="p" id="gCam">지금 촬영 화면으로 분석</button></div>
+  <canvas id="gView" class="snap" style="display:none;margin-top:10px"></canvas>
+  <div id="gOut" style="margin-top:10px"></div>
+  <details style="margin-top:10px"><summary class="note">영역·눈금 보정 (결과가 이상할 때)</summary>
+   <p class="note">값은 사진 크기에 대한 %입니다. 미리보기의 흰 점선 상자가 그래프 안쪽을 덮고, 수평선 두 개가 0선과 최상단 눈금선에 맞아야 합니다.</p>
+   <div class="g2">
+    <label>왼쪽 x(%)<input id="g_x0" value="5"></label><label>오른쪽 x(%)<input id="g_x1" value="78"></label>
+    <label>위쪽 y(%)<input id="g_y0" value="29.5"></label><label>아래쪽 y(%)<input id="g_y1" value="76"></label>
+    <label>0선 위치 y(%) (연속)<input id="g_zero" value="56.6"></label><label>최상단 눈금선 y(%) (연속)<input id="g_top" value="30.5"></label>
+    <label>최상단 눈금 값 (연속)<input id="g_max" value="30000"></label>
+    <label>0선 왼쪽 y(%) (비교)<input id="g_zl" value="55.2"></label><label>0선 오른쪽 y(%) (비교)<input id="g_zr" value="47.8"></label>
+    <label>1만 구슬 높이 왼쪽(%)<input id="g_sl" value="15.3"></label><label>1만 구슬 높이 오른쪽(%)<input id="g_sr" value="14.0"></label>
+    <label>9:00 위치 x(%)<input id="g_t0" value="3.4"></label><label>23:00 위치 x(%)<input id="g_t1" value="83.4"></label>
+   </div>
+   <div class="row"><button id="gRe">다시 분석</button></div>
+  </details>
+  <label style="margin-top:10px">기계 번호 (저장용)<input id="g_no" inputmode="numeric"></label>
+  <div class="row"><button class="p" id="gSave">요약 저장</button></div>
+ </div>
+ <div class="card"><h2>하단 표 (획득수·스타트 회전수)</h2>
+  <div class="tr"><div class="ja">最高出玉 本日 / 過去</div><div class="ko">최고 출옥 오늘 / 과거</div><div class="note">읽은 값: 1400 / 63590</div></div>
+  <div class="tr"><div class="ja">獲得数 · 継続数 · スタート回数</div><div class="ko">당첨별 획득 구슬 · 연속 횟수(10R, 7連 등) · 당첨까지 회전수</div><div class="note">획득수: 1400, 280, 270, 9710, 270, 1350, 1390, 270, 6900, 270<br>스타트 회전수: 1(현재), 247, 243, 307, 316, 535, 191, 241, 85, 151, 5, 239<br>획득수와 칸의 대응은 화면상 불확실합니다.</div></div>
+  <div class="tr"><div class="ja">小 / 前日最終 / 現在</div><div class="ko">소당첨 / 전일 마지막 / 현재</div></div>
+  <div class="row"><button id="gFill">스타트 회전수를 당첨 이력으로 채우기</button></div>
+  <div class="tr" style="margin-top:12px"><div class="ja">比較グラフ 화면의 最高出玉</div><div class="ko">비교 그래프 화면 왼쪽 아래: 최고 출옥</div><div class="note">읽은 값: 91390 (표 숫자는 각도 때문에 읽기 어려움)</div></div>
+  <div class="row"><button id="gFill2">최고 출옥 91390 채우기</button></div>
+ </div>
+ <div class="card warn"><div class="note" style="color:inherit">그래프는 이미 일어난 결과의 기록입니다. 선이 많이 올랐거나 내려갔다는 사실이 다음 당첨 확률을 바꾸지는 않습니다. 이 분석은 기계 상태를 파악하는 참고 자료이고, 순위 점수에는 반영하지 않습니다.</div></div>
+</section>
+
+<!-- 메뉴판 -->
+<section class="tab" id="t7">
+ <div class="card"><div class="seg" id="foodSeg"><button data-c="ja" class="on2">일본 음식</button><button data-c="th">태국 음식</button><button data-c="zh">중국 음식</button></div><h2 id="mTitle">일본 음식 메뉴판 번역</h2>
+  <p class="note">메뉴판 사진을 찍거나 올리면 글자를 읽어 한국어로 바꿔 줍니다. 번역은 사진 위에 덮어 보여 주고, 아래 목록에는 원문 아래에 한국어와 원화 가격을 표시합니다.</p>
+  <div class="row"><label style="width:100%">메뉴판 사진<input type="file" id="mFile" accept="image/*" capture="environment"></label></div>
+  <div class="row"><button class="p" id="mCam">지금 카메라 화면 번역</button></div>
+  <label style="margin-top:10px"><span id="m_rateL">환율 (100엔당 원, 직접 확인해서 입력)</span><input id="m_rate" inputmode="decimal" value="900"></label>
+  <div class="status" id="mSt">사진을 선택하세요</div>
+ </div>
+ <div class="card" id="mCard" style="display:none"><h2>번역 결과</h2>
+  <div class="row" style="margin-top:0"><button id="mToggle">원본 보기</button></div>
+  <canvas id="mView" class="snap" style="margin-top:10px"></canvas>
+ </div>
+ <div class="card"><h2>메뉴 목록</h2><div id="mList" class="note">번역 결과가 여기에 표시됩니다.</div></div>
+ <div class="card"><h2 id="ykTitle">용어 도움말</h2><div id="ykBox"></div></div>
+ <div class="card warn"><div class="note">세로쓰기, 필기체, 장식 글꼴은 인식이 약합니다. 사전만 쓰면 단어 단위 번역이라 어색할 수 있으니, 번역·사전 탭에 Google Cloud Translation API 키를 넣으면 문장 번역으로 좋아집니다. 알레르기나 원재료는 반드시 직원에게 확인하세요.</div></div>
+</section>
+
+<!-- 대화 -->
+<section class="tab" id="t8">
+ <div class="cvwrap">
+  <div class="cvp flip" id="cvTop"></div>
+  <div class="cvbar" style="flex-direction:column;align-items:stretch;gap:6px">
+   <button class="p" id="cv_go" style="min-height:50px;font-size:16px">대화 시작</button>
+   <label style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink)">상대 언어 <select id="cv_lang" style="width:auto;margin:0"><option value="ja">일본어</option><option value="en">영어</option><option value="zh">중국어</option></select></label>
+   <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <label><input type="checkbox" id="cv_tts">번역 음성 재생</label>
+    <button id="cv_flip" class="on">위쪽 뒤집기 켬</button>
+    <button id="cv_clr">지우기</button>
+   </div>
+   <div id="cv_eng">시작하면 사용할 음성 인식·번역 방식이 표시됩니다</div>
+  </div>
+  <div class="cvp" id="cvBot"></div>
+ </div>
+</section>
+
+<nav><button class="on" data-t="0"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>촬영</span></button><button data-t="1"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M8 7h.01M8 17h.01"/></svg><span>기계</span></button><button data-t="2"><svg viewBox="0 0 24 24"><path d="M6 20V11M12 20V5M18 20v-6"/></svg><span>순위</span></button><button data-t="3"><svg viewBox="0 0 24 24"><path d="M4 6h9M8.5 4v2M6 6c0 4 3 7 6 8M12 6c0 3-3 7-7 9M13 20l4-9 4 9M14.5 17h5"/></svg><span>번역</span></button><button data-t="4"><svg viewBox="0 0 24 24"><path d="M5 7h8M17 7h2M5 17h2M11 17h8"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>설정</span></button><button data-t="5"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15V9h3M13 9h4M13 12h4M13 15h4"/></svg><span>카운터</span></button><button data-t="6"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M4 21h16"/></svg><span>그래프</span></button></nav>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const DICT={"日別グラフ":"일별 그래프","初当り":"초당(첫 당첨)","初当":"초당","前日最終スタート":"전일 마지막 스타트","タイプ":"타입","種類":"종류","4円パチンコ":"4엔 파칭코","比較グラフ":"비교 그래프","演出カスタム":"연출 커스텀","先役物落下カスタム":"선역물 낙하 커스텀","先役物落下":"선역물 낙하(가동 역물 낙하 연출, 추정)","先役物":"선역물(먼저 움직이는 가동 역물)","先読みカスタム":"선읽기 커스텀","落下":"낙하","発生なし":"발생 없음","発生":"발생","インフォメーション":"안내","information":"안내","EX":"EX(특별 단계)","連続グラフ":"연속 그래프","ラッキートリガー":"러키 트리거","本日最高":"오늘 최고","過去最高":"과거 최고","獲得数":"획득수(구슬)","継続数":"연속 횟수","スタート回数":"스타트 회전수","前日最終":"전일 마지막","現在":"현재","小":"소(소당첨)","10R":"10라운드","大当":"대당(대당첨)","1日前":"1일 전","2日前":"2일 전","過去最高大当回数":"과거 최고 대당 횟수","最高大当回数":"최고 대당 횟수","最高出玉":"최고 출옥(최다 획득 구슬)","特賞履歴":"특상 이력(대당첨 이력)","特賞":"특상(대당첨)","日分":"오늘 분","前に戻る":"이전으로","戻る":"뒤로","グラフ":"그래프","過去":"과거","情報":"정보","呼出":"호출","連":"연속(연챤)","玉":"구슬","サンドガイド":"샌드(지폐·카드 투입기) 안내","カード挿入":"카드 삽입","スタート":"스타트(직전 당첨 후 회전수)","ゲーム性カスタマイズ":"게임성 커스터마이즈","カスタマイズ":"커스터마이즈(설정 변경)","カスタム":"커스텀","先告知":"선고지(미리 알림)","先読み":"선읽기(보류 미리보기)","アラート":"알림","咆哮":"포효","次回予告":"다음 회 예고","限定":"한정","なし":"없음","オススメ":"추천","チャンス":"찬스","熱":"열(기대도 높음)","エアー":"에어","アップ":"업(상향)","インパクトフラッシュ":"임팩트 플래시","レバブル":"레버블","出現率":"출현율","通常時":"통상시","カーソル移動":"커서 이동","決定":"결정","カヲル":"카오루","レイ":"레이","エヴァンゲリオン":"에반게리온","します":"합니다","台番号":"기계 번호","機種名":"기종명","総回転数":"총 회전수","回転数":"회전수","スタート":"스타트(회전수)","大当り":"대당첨","大当たり":"대당첨","大当り回数":"대당첨 횟수","大当り確率":"대당첨 확률","確率":"확률","前日":"전일","本日":"오늘","当日":"당일","履歴":"이력","当り履歴":"당첨 이력","最高出玉":"최고 출옥(구슬 수)","出玉":"출옥(획득 구슬)","持ち玉":"보유 구슬","貸玉":"대여 구슬","確変":"확변(확률 변동)","時短":"시단(시간 단축)","通常":"통상","連チャン":"연속 당첨","単発":"단발(연속 없음)","ハマリ":"하마리(오래 안 터짐)","ボーダー":"보더(손익분기 회전수)","回転率":"회전율","千円":"1,000엔","投資":"투자","ヘソ":"헤소(시작 구멍)","アタッカー":"어태커(대당첨 입구)","ラウンド":"라운드","リーチ":"리치","保留":"보류(대기 구슬)","予告":"예고","演出":"연출","ボタン":"버튼","レバー":"레버","ハンドル":"핸들","打ち出し":"발사","右打ち":"우타(오른쪽 발사)","左打ち":"좌타(왼쪽 발사)","注意":"주의","禁止":"금지","遊技":"유기(게임)","呼出":"호출","ミッション":"미션","ボーナス":"보너스","設定":"설정","総":"총","回":"회","日":"일","台":"대"};
+const KEYS=Object.keys(DICT).sort((a,b)=>b.length-a.length);
+const koOf=s=>{let o=s;KEYS.forEach(k=>o=o.split(k).join(DICT[k]));return o};
+let apiKey=localStorage.getItem('pj_key')||'';$('apiKey').value=apiKey;
+$('apiKey').onchange=e=>{apiKey=e.target.value.trim();localStorage.setItem('pj_key',apiKey)};
+
+async function translate(lines,fn=koOf,src='ja'){
+ if(apiKey){try{
+  const r=await fetch('https://translation.googleapis.com/language/translate/v2?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:lines,source:src,target:'ko',format:'text'})});
+  const j=await r.json();return j.data.translations.map((t,i)=>t.translatedText||fn(lines[i]));
+ }catch(e){}}
+ return lines.map(fn);
+}
+function showTr(box,lines,ko){
+ box.innerHTML=lines.map((l,i)=>`<div class="tr"><div class="ja"></div><div class="ko"></div></div>`).join('');
+ [...box.children].forEach((d,i)=>{d.children[0].textContent=lines[i];d.children[1].textContent=ko[i]});
+}
+
+/* ---- 탭 ---- */
+
+/* ---- 카메라 ---- */
+let stream=null,live=null,busy=false;
+$('camBtn').onclick=async()=>{
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;$('vid').style.display='none';$('camOff').style.display='block';$('camBtn').textContent='카메라 켜기';stopLive();return}
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920}}});
+  $('vid').srcObject=stream;await $('vid').play();
+  $('vid').style.display='block';$('camOff').style.display='none';$('snap').style.display='none';$('camBtn').textContent='카메라 끄기';
+ }catch(e){$('st').textContent='카메라를 열 수 없습니다: '+e.message}
+};
+function stopLive(){clearInterval(live);live=null;$('liveBtn').classList.remove('on');$('liveBtn').textContent='실시간 번역 끔'}
+$('liveBtn').onclick=()=>{
+ if(live){stopLive();return}
+ if(!stream){$('st').textContent='먼저 카메라를 켜주세요';return}
+ $('liveBtn').classList.add('on');$('liveBtn').textContent='실시간 번역 켬';
+ live=setInterval(()=>{if(!busy)shot()},5000);shot();
+};
+$('shotBtn').onclick=()=>shot();
+$('file').onchange=e=>{
+ const f=e.target.files[0];if(!f)return;const img=new Image();
+ img.onload=()=>{const c=$('snap');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);c.style.display='block';$('camOff').style.display='none';ocr(c)};
+ img.src=URL.createObjectURL(f);
+};
+function shot(){
+ if(!stream){$('st').textContent='카메라를 켜거나 사진 파일을 선택하세요';return}
+ const v=$('vid'),c=$('snap');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);return ocr(c);
+}
+const WK={};
+async function getWorker(lang='jpn+eng'){
+ if(!WK[lang])WK[lang]=await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status&&!AUTO.on)$('st').textContent='인식 중: '+m.status+' '+Math.round((m.progress||0)*100)+'%'}});
+ return WK[lang];
+}
+async function ocr(canvas){
+ if(busy)return;busy=true;
+ try{
+  if(typeof Tesseract==='undefined')throw new Error('OCR 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요');
+  const sc=Math.min(1,1400/canvas.width),w=document.createElement('canvas');w.width=Math.round(canvas.width*sc);w.height=Math.round(canvas.height*sc);
+  const x=w.getContext('2d');x.filter='grayscale(1) contrast(1.4)';x.drawImage(canvas,0,0,w.width,w.height);
+  const r=await (await getWorker()).recognize(w);
+  const lines=r.data.text.split('\n').map(s=>s.replace(/(?<=[\u3040-\u30ff\u4e00-\u9fff])\s+(?=[\u3040-\u30ff\u4e00-\u9fff])/g,'').trim()).filter(Boolean);
+  if(AUTO.on)await autoProcess(lines,canvas,r.data.confidence);
+  else{
+   $('st').textContent='인식 완료 (신뢰도 '+Math.round(r.data.confidence)+'%) — 값을 확인한 뒤 저장하세요';
+   if(/カスタマイズ|カスタム/.test(lines.join('')))$('st').textContent+=/演出カスタム|落下/.test(lines.join(''))?' · 연출 커스텀 설정 화면으로 보입니다. 설정화면 탭을 참고하세요':' · 설정 화면으로 보입니다. 설정화면 탭을 참고하세요';
+   fill(parse(lines.join('\n')));
+  }
+  const key=lines.join('|');
+  if(key!==AUTO.trKey){AUTO.trKey=key;showTr($('trOut'),lines,await translate(lines))}
+ }catch(e){$('st').textContent='오류: '+e.message}
+ busy=false;
+}
+
+/* ---- 파싱 ---- */
+function parse(t){
+ const s=t.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[Oo](?=\d)|(?<=\d)[Oo]/g,'0').replace(/[,，]/g,'');
+ const m=(re)=>{const r=s.match(re);return r?r[1]:''};
+ const hi=s.split(/特賞履歴|当り履歴|履歴/)[1]||'';
+ const rows=hi.split('\n').map(l=>l.match(/\d{2,4}/g)||[]).filter(a=>a.length>=2).map(a=>a[0]);
+ return{
+  no:m(/(?:台番号?|台No\.?|No\.?)\s*[:：]?\s*(\d{1,4})/),
+  name:m(/^\s*([PeＰｅ]\s?[^\s\d]{2,30}.*)$/m).trim(),
+  spins:m(/(?:総?回転数?|スタート|ゲーム数|現在)\D{0,4}(\d{1,5})/),
+  today:m(/(?:大当[りた]り?|当り|当たり)(?:回数)?\D{0,4}(\d{1,3})/),
+  prev:m(/(?:前日|1日前)\D{0,6}(\d{1,3})/),rec:m(/過去最高大当[りた]?回数\D{0,4}(\d{1,3})/),ball:m(/最高出玉\D{0,4}(\d{3,6})/),
+  prob:m(/1\s*[\/／]\s*(\d{2,4}(?:\.\d+)?)/),
+  noCand:m(/^\s*(\d{3,4})\s*$/m),
+  hist:(rows.length?rows:(hi.match(/\b\d{2,4}\b/g)||[])).slice(0,10).join(', ')
+ };
+}
+function fill(p){
+ [['no','no'],['name','name'],['spins','spins'],['today','today'],['prev','prev'],['prob','prob'],['rec','rec'],['ball','ball'],['hist','hist']].forEach(([a,b])=>{if(p[b])$('f_'+a).value=p[b]});
+}
+$('clrBtn').onclick=()=>['no','name','spins','today','prev','prob','yen','ys','rec','ball','hist'].forEach(k=>$('f_'+k).value='');
+
+/* ---- 저장 ---- */
+let DB=JSON.parse(localStorage.getItem('pj_db')||'{}');
+const save=()=>localStorage.setItem('pj_db',JSON.stringify(DB));
+const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n};
+$('saveBtn').onclick=()=>{
+ const no=$('f_no').value.trim();if(!no){$('st').textContent='기계 번호를 입력해 주세요';return}
+ const yen=num($('f_yen').value),ys=num($('f_ys').value);
+ const snap={t:Date.now(),spins:num($('f_spins').value),today:num($('f_today').value),prev:num($('f_prev').value),prob:num($('f_prob').value),rec:num($('f_rec').value),ball:num($('f_ball').value),
+  hist:$('f_hist').value.split(/[,\s]+/).map(Number).filter(n=>n>0),spy:(yen&&ys)?ys/yen*1000:null};
+ const m=DB[no]||(DB[no]={name:'',snaps:[]});
+ if($('f_name').value)m.name=$('f_name').value;m.snaps.push(snap);save();
+ $('st').textContent='기계 '+no+' 저장됨 (기록 '+m.snaps.length+'건)';
+};
+
+
+/* ---- 자동 입력 ---- */
+const AUTO={on:false,votes:[],saved:0,last:{},undo:null,trKey:'',grKey:'',kind:''};
+const KN={seq:'연속 그래프',cmp:'비교 그래프',day:'일별 그래프',set:'설정 화면',ctr:'데이터 카운터'};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const classify=t=>{const s=t.replace(/\s/g,'');return /連続グラフ/.test(s)?'seq':/比較グラフ/.test(s)?'cmp':/日別グラフ/.test(s)?'day':/カスタマイズ|カスタム/.test(s)?'set':/大当|スタート|最高出玉|特賞履歴|回転/.test(s)?'ctr':''};
+const setNo=v=>{$('a_no').value=v;$('f_no').value=v};
+function resetMachine(){AUTO.votes=[];AUTO.grKey='';['name','spins','today','prev','prob','rec','ball','hist'].forEach(k=>$('f_'+k).value='')}
+function vote(p){
+ AUTO.votes.push(p);if(AUTO.votes.length>3)AUTO.votes.shift();const out={};
+ ['no','noCand','name','spins','today','prev','prob','rec','ball','hist'].forEach(k=>{
+  const c={};AUTO.votes.forEach(v=>{if(v[k])c[v[k]]=(c[v[k]]||0)+1});
+  const e=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];if(e&&e[1]>=2)out[k]=e[0]});
+ return out;
+}
+function setStat(extra){$('aStat').textContent='화면: '+(KN[AUTO.kind]||'감지 안 됨')+' · 자동 저장 '+AUTO.saved+'건'+(extra?' · '+extra:'')}
+function autoSave(out){
+ if(!$('a_save').checked)return'자동 저장 꺼짐';
+ const no=$('a_no').value.trim();if(!no)return'기계 번호를 인식하지 못했습니다. 위 칸에 한 번만 입력해 주세요';
+ if(!(out.spins||out.today||out.prev||out.hist))return'';
+ const snap={t:Date.now(),spins:num(out.spins),today:num(out.today),prev:num(out.prev),prob:num(out.prob),rec:num(out.rec),ball:num(out.ball),hist:(out.hist||'').split(/[,\s]+/).map(Number).filter(n=>n>0),spy:null};
+ const hk=snap.hist.join('.'),key=[snap.spins,snap.today,snap.prev,snap.prob,hk].join('|'),L=AUTO.last[no],now=Date.now();
+ if(L&&L.key===key)return'';
+ if(L&&now-L.t<45000&&L.today===snap.today&&L.hk===hk)return'';
+ const created=!DB[no],m=DB[no]||(DB[no]={name:'',snaps:[]});
+ if(out.name&&!m.name)m.name=out.name;m.snaps.push(snap);save();
+ AUTO.last[no]={key,t:now,today:snap.today,hk};AUTO.saved++;AUTO.undo={no,created};render();
+ return'기계 '+no+' 저장됨';
+}
+async function autoProcess(lines,canvas,conf){
+ const text=lines.join('\n'),kind=classify(text);AUTO.kind=kind;$('aGraph').textContent='';
+ if(conf<30){setStat('화면이 흐립니다. 초점과 빛 반사를 확인하세요');return}
+ if(kind==='set'){setStat('설정 화면입니다. 설정화면 탭에서 확인하세요');return}
+ if(!kind){setStat('카운터나 그래프 화면을 비춰 주세요');return}
+ let msg='';
+ if(kind==='ctr'||kind==='day'){
+  const out=vote(parse(text));
+  if(out.no&&out.no!==$('a_no').value.trim()){setNo(out.no);resetMachine();AUTO.votes=[parse(text)]}
+  else if(!$('a_no').value.trim()&&out.noCand&&AUTO.votes.length>=3&&AUTO.votes.every(v=>v.noCand===out.noCand)){setNo(out.noCand);msg='기계 번호 '+out.noCand+' 자동 인식(틀리면 수정)'}
+  fill(out);$('f_no').value=$('a_no').value;
+  msg=autoSave(out)||msg;
+ }
+ if(kind==='seq'||kind==='cmp'||kind==='day'){
+  const gk=kind;$('g_mode').value=gk;const pr=PRE[gk];for(const k in pr)$('g_'+k).value=pr[k];
+  gLoad(canvas,canvas.width,canvas.height);
+  const found=gLines.filter(l=>!/찾지 못/.test(l));
+  $('aGraph').innerHTML=found.slice(0,4).map(esc).join('<br>');
+  const no=$('a_no').value.trim(),gkey=found.join('|');
+  if(no&&found.length&&$('a_save').checked&&gkey!==AUTO.grKey){GR[no]=found;AUTO.grKey=gkey;localStorage.setItem('pj_gr',JSON.stringify(GR));msg=(msg?msg+' · ':'')+'그래프 요약 저장됨'}
+ }
+ setStat(msg);
+}
+async function autoLoop(){
+ while(AUTO.on){
+  if(stream&&$('vid').videoWidth)await shot();
+  await sleep(1500);
+ }
+}
+$('autoBtn').onclick=async()=>{
+ if(AUTO.on){AUTO.on=false;$('autoBtn').textContent='자동 입력 시작';$('autoBtn').classList.remove('d');$('aStat').textContent='중지됨 · 자동 저장 '+AUTO.saved+'건';return}
+ if(!stream)await $('camBtn').onclick();
+ if(!stream)return;
+ stopLive();AUTO.on=true;AUTO.votes=[];$('autoBtn').textContent='자동 입력 중지';$('autoBtn').classList.add('d');$('aStat').textContent='인식을 시작합니다 (첫 실행은 일본어 데이터를 받느라 오래 걸릴 수 있습니다)';
+ autoLoop();
+};
+$('a_no').onchange=e=>{setNo(e.target.value.trim());AUTO.votes=[];AUTO.grKey=''};
+$('nextBtn').onclick=()=>{setNo('');resetMachine();$('aGraph').textContent='';$('aStat').textContent='다음 기계: 번호를 인식하는 중입니다'};
+$('undoBtn').onclick=()=>{
+ const u=AUTO.undo;if(!u||!DB[u.no])return alert('취소할 자동 저장이 없습니다');
+ DB[u.no].snaps.pop();if(!DB[u.no].snaps.length&&u.created)delete DB[u.no];
+ delete AUTO.last[u.no];AUTO.saved=Math.max(0,AUTO.saved-1);AUTO.undo=null;save();render();$('aStat').textContent='기계 '+u.no+'의 마지막 자동 저장을 취소했습니다';
+};
+
+/* ---- 분석 ---- */
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function analyze(no){
+ const m=DB[no],S=m.snaps,last=S[S.length-1];
+ const hist=[].concat(...S.map(s=>s.hist));
+ const spyList=S.map(s=>s.spy).filter(Boolean);
+ const maxSpins=Math.max(0,...S.map(s=>s.spins||0));
+ const hitRate=(last.today!=null&&last.spins)?last.today/Math.max(last.spins,1):null;
+ return{no,name:m.name,last,S,hist,spy:avg(spyList),avgInt:avg(hist),maxInt:hist.length?Math.max(...hist):null,hitRate,
+  rel:Math.round((Math.min(1,maxSpins/2000)*.6+Math.min(1,S.length/3)*.4)*100)};
+}
+function render(){
+ const A=Object.keys(DB).map(analyze);
+ const mx=Math.max(1,...A.map(a=>a.spy||0)),mh=Math.max(1e-9,...A.map(a=>a.hitRate||0));
+ A.forEach(a=>a.score=Math.round(((a.spy||0)/mx*60)+((a.hitRate||0)/mh*25)+a.rel/100*15));
+ A.sort((a,b)=>b.score-a.score);
+ $('ranking').innerHTML=A.length?A.map((a,i)=>`<div class="rank ${i<3?'top':''}"><div class="no">${a.no}</div><div class="b"><b>${esc(a.name)||'기종 미입력'}</b><br>1,000엔당 ${a.spy?a.spy.toFixed(1)+'회전':'미측정'} · 당일 ${a.last.today??'-'}회 · 평균 간격 ${a.avgInt?Math.round(a.avgInt):'-'}<div class="bar"><i style="width:${a.rel}%"></i></div><span class="note">데이터 신뢰도 ${a.rel}%${a.spy?'':' · 회전 효율을 측정하면 순위가 정확해집니다'}</span></div><div class="score"><strong>${a.score}</strong>점</div></div>`).join(''):'저장된 기계가 없습니다.';
+ $('machines').innerHTML=A.length?A.map(a=>`<div class="card"><h2>${a.no}번 ${esc(a.name)}</h2>
+ <table><tr><td>현재 회전수</td><td>${a.last.spins??'-'}</td></tr><tr><td>당일 / 전일 당첨</td><td>${a.last.today??'-'} / ${a.last.prev??'-'}</td></tr>
+ <tr><td>표시 확률</td><td>${a.last.prob?'1/'+a.last.prob:'-'}</td></tr><tr><td>과거 최고 대당 / 최고 출옥</td><td>${a.last.rec??'-'}회 / ${a.last.ball??'-'}</td></tr><tr><td>1,000엔당 회전수</td><td>${a.spy?a.spy.toFixed(1):'-'}</td></tr>
+ <tr><td>평균 / 최대 당첨 간격</td><td>${a.avgInt?Math.round(a.avgInt):'-'} / ${a.maxInt??'-'}</td></tr>
+ ${GR[a.no]?'<tr><td>연속 그래프</td><td>'+GR[a.no].map(esc).join('<br>')+'</td></tr>':''}${CFG[a.no]?'<tr><td>커스텀 설정</td><td>'+Object.entries(CFG[a.no]).map(e=>e.join(': ')).join('<br>')+'</td></tr>':''}<tr><td>회전수 변화</td><td>${a.S.map(s=>s.spins??'-').join(' → ')}</td></tr></table>
+ <canvas data-no="${a.no}" height="110" style="width:100%;margin-top:8px"></canvas>
+ <div class="row"><button class="d" onclick="del('${a.no}')">삭제</button></div></div>`).join(''):'<div class="card note">저장된 기계가 없습니다. 촬영 탭에서 추가하세요.</div>';
+ document.querySelectorAll('canvas[data-no]').forEach(c=>chart(c,analyze(c.dataset.no)));
+}
+const esc=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function del(no){if(confirm(no+'번 기계 기록을 삭제할까요?')){delete DB[no];save();render()}}
+function chart(c,a){
+ c.width=c.clientWidth*2||800;c.height=220;const x=c.getContext('2d'),h=a.hist.slice(-12);
+ x.clearRect(0,0,c.width,c.height);x.font='20px sans-serif';
+ if(!h.length){x.fillStyle='#8f9abf';x.fillText('당첨 이력이 없습니다',10,40);return}
+ const mx=Math.max(...h),bw=c.width/h.length;
+ h.forEach((v,i)=>{const bh=v/mx*150;x.fillStyle=v>a.avgInt*1.5?'#ff6b4a':'#35d6cf';x.fillRect(i*bw+6,190-bh,bw-12,bh);x.fillStyle='#e8ecf8';x.fillText(v,i*bw+8,184-bh)});
+ const y=190-a.avgInt/mx*150;x.strokeStyle='#e8ecf8';x.setLineDash([8,6]);x.beginPath();x.moveTo(0,y);x.lineTo(c.width,y);x.stroke();x.setLineDash([]);
+ x.fillStyle='#8f9abf';x.fillText('당첨 간 회전수 (점선: 평균, 주황: 평균의 1.5배 이상)',6,215);
+}
+
+/* ---- 번역 / 사전 ---- */
+$('trBtn').onclick=async()=>{
+ const l=$('trIn').value.split('\n').map(s=>s.trim()).filter(Boolean);if(!l.length)return;
+ showTr($('trMan'),l,await translate(l));
+};
+function dictRender(){
+ const q=$('dq').value.trim(),f=(k,v)=>!q||k.includes(q)||v.includes(q),h=t=>`<tr><td colspan="2" style="color:var(--acc);font-weight:700">${t}</td></tr>`,row=(k,v)=>`<tr><td>${k}</td><td style="color:var(--ink)">${v}</td></tr>`;
+ const a=KEYS.filter(k=>f(k,DICT[k])).map(k=>row(k,DICT[k])),b=[];
+ $('dict').innerHTML=(a.length?h('파칭코 용어')+a.join(''):'')+(b.length?h('메뉴·음식 용어')+b.join(''):'');
+}
+
+/* ---- 설정화면 ---- */
+const SECS=['▼通常時 화면 (통상시)','▼演出カスタム 화면 (연출 커스텀)'];
+const SET=[
+{sec:0,id:'sak',ja:'先告知カスタム',ko:'선고지 커스텀',d:'대당첨 전조(선고지) 표시 방식을 고릅니다.',o:[['OFF','끔'],['アラート','알림'],['咆哮','포효 (글자가 흐려 추정)'],['次回予告','다음 회 예고'],['カヲル/レイ限定','카오루/레이 한정']]},
+{sec:0,id:'sak2',ja:'先読み(カスタム)',ko:'선읽기',d:'보류 단계에서 미리 보여 주는 예고를 고릅니다. 연출 커스텀 화면에서는 「先読みカスタム」로 표시됩니다.',o:[['なし','없음'],['オススメ','추천'],['チャンス','찬스'],['熱','열(기대도 높음)']]},
+{sec:0,id:'reb',ja:'レバブルアップ',ko:'레버블 업',d:'기종 고유 용어라 정확한 뜻은 기종 설명서로 확인이 필요합니다. 두 화면 모두에 나옵니다.',o:[['OFF','끔'],['ON','켬']]},
+{sec:0,id:'imp',ja:'インパクトフラッシュアップ',ko:'임팩트 플래시 업',d:'임팩트 플래시 연출과 관련된 설정으로 보입니다(추정). 두 화면 모두에 나옵니다.',o:[['OFF','끔'],['ON','켬']]},
+{sec:0,id:'air',ja:'エアーカスタム',ko:'에어 커스텀',d:'ON이면 에어의 출현율이 올라갑니다.',o:[['OFF','끔'],['ON','켬']]},
+{sec:1,id:'yak',ja:'通常時 先役物落下カスタム',ko:'통상시 선역물 낙하 커스텀',d:'통상 중 가동 역물(장치)이 먼저 떨어지는 연출을 얼마나 내보낼지 고르는 설정으로 보입니다(추정). 40%·90%는 발생 비율, EX는 최대 단계로 보이나 정확한 뜻은 기종 설명서 확인이 필요합니다.',o:[['OFF','끔'],['40%','40%'],['90%','90%'],['EX','EX(특별)']],info:['先役物落下発生なし。','선역물 낙하 발생 없음.']}
+];
+let CFG=JSON.parse(localStorage.getItem('pj_cfg')||'{}');
+$('setList').innerHTML=SECS.map((t,i)=>`<h3 style="font-size:14px;margin:14px 0 4px">${t}</h3>`+SET.filter(x=>x.sec===i).map(x=>`<div class="tr"><div class="ja">${x.ja}</div><div class="ko">${x.ko}</div><div class="note">${x.d}</div><div class="note">${x.o.map(o=>o[0]+' = '+o[1]).join(' / ')}</div>${x.info?`<div class="note">하단 안내: ${x.info[0]} → ${x.info[1]}</div>`:''}</div>`).join('')).join('');
+$('setForm').innerHTML=SET.map(x=>`<label>${x.ko}<select id="c_${x.id}"><option value="">미입력</option>${x.o.map(o=>`<option value="${o[1]}">${o[0]} (${o[1]})</option>`).join('')}</select></label>`).join('');
+$('cfgYak').onclick=()=>{$('c_yak').value='끔';$('c_yak').scrollIntoView({block:'center'})};
+$('cfgSave').onclick=()=>{
+ const no=$('c_no').value.trim();if(!no)return alert('기계 번호를 입력해 주세요');
+ CFG[no]={};SET.forEach(x=>{const v=$('c_'+x.id).value;if(v)CFG[no][x.ko]=v});
+ localStorage.setItem('pj_cfg',JSON.stringify(CFG));render();alert(no+'번 기계 설정을 저장했습니다');
+};
+
+/* ---- 카운터 해설 ---- */
+const CTR=[
+['大当 (큰 숫자)','오늘 대당 횟수','9'],
+['スタート','스타트: 직전 당첨 이후 현재까지 돈 회전수','103'],
+['台番号 (좌측 하단 작은 숫자)','기계 번호','310'],
+['大当り 1日前 2日前','대당 횟수: 오늘 / 1일 전 / 2일 전','9 / 35 / 9'],
+['둘째 줄 (아이콘 흐림)','BB·ART 등 세부 구분 횟수로 보임(확실하지 않음)','2 / 8 / 2'],
+['過去最高大当回数','과거 최고 대당 횟수','41회'],
+['最高出玉','최고 출옥(획득 구슬). 아래 두 값의 구분은 화면상 불확실','5920 / 51930'],
+['特賞履歴','특상 이력: 회전수 · 연속 횟수 · 출옥 순으로 표시','아래 참고'],
+['  최근 이력','チャンス(찬스) 당첨 기준','529회·5連·5840 / 240회·4連·4640 / 130회·5連·5700 / 256회·2連·2640'],
+['呼出 / 戻る / グラフ / 履歴 / 過去 / 情報','호출 / 이전으로 / 그래프 / 이력 / 과거 / 정보 (하단 버튼)','-']
+];
+$('ctrList').innerHTML=CTR.map(r=>`<div class="tr"><div class="ja">${r[0]}</div><div class="ko">${r[1]}</div><div class="note">읽은 값: ${r[2]}</div></div>`).join('');
+
+const CTR2=[
+['大当り / 1日前 / 2日前','대당 횟수: 오늘 / 1일 전 / 2일 전','0 / 19 / 7'],
+['初当り / 1日前 / 2日前','초당(첫 당첨) 횟수: 오늘 / 1일 전 / 2일 전','0 / 13 / 5'],
+['大当り 1/-  初当り 1/-','대당·초당 확률(1/○). 오늘은 데이터가 없어 「-」로 표시','-'],
+['前日最終スタート','전일 마지막 스타트: 전일 마감 시점의 스타트 회전수','247'],
+['最高出玉 (過去最高)','최고 출옥(과거 최고)','91390'],
+['タイプ / 種類','타입 / 종류: 4엔 파칭코(구슬 1개 4엔). 타입 글자는 하이로 읽힘','ハイ / 4円パチンコ'],
+['왼쪽 큰 숫자','오늘 대당 횟수(7세그먼트)','0'],
+['하단 スタート回数','당첨까지 회전수. 첫 칸(31)은 현재, 다음 칸(247)은 전일 마지막으로 보임','31, 247, 85, 176, 99, 120, 453, 120, 22, 474, 625, 209 (칸 정렬 불확실)'],
+['日別グラフ','일별 그래프: 날짜별 출옥 누적 선. 노랑 = 1일 전, 빨강 = 오늘. 오늘 선은 아직 거의 없음','그래프 탭에서 종류를 일별 그래프로 선택']
+];
+$('ctrList2').innerHTML=CTR2.map(r=>`<div class="tr"><div class="ja">${r[0]}</div><div class="ko">${r[1]}</div><div class="note">읽은 값: ${r[2]}</div></div>`).join('');
+$('sample2Btn').onclick=()=>{fill({today:'0',prev:'19',spins:'31',ball:'91390',hist:'85, 176, 99, 120, 453, 120, 22, 474, 625, 209'});document.querySelector('nav button[data-t="0"]').click();$('st').textContent='샘플 값을 채웠습니다. 기계 번호를 넣고 저장하세요'};
+$('sampleBtn').onclick=()=>{
+ fill({no:'310',name:'CR 에반게리온 계열',spins:'103',today:'9',prev:'35',rec:'41',ball:'5920',hist:'529, 240, 130, 256'});
+ document.querySelector('nav button[data-t="0"]').click();$('st').textContent='샘플 값을 채웠습니다. 확인 후 저장하세요';
+};
+let GR=JSON.parse(localStorage.getItem('pj_gr')||'{}');
+/* ---- 연속 그래프 분석 ---- */
+const GS=document.createElement('canvas');let gLines=[];
+const gv=id=>parseFloat($('g_'+id).value);
+const fmt=n=>(Math.round(n/100)*100).toLocaleString('ko-KR');
+function gLoad(src,w,h){GS.width=w;GS.height=h;GS.getContext('2d').drawImage(src,0,0,w,h);gRun()}
+$('gFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>gLoad(im,im.naturalWidth,im.naturalHeight);im.src=URL.createObjectURL(f)};
+$('gCam').onclick=()=>{
+ if(stream&&$('vid').videoWidth)return gLoad($('vid'),$('vid').videoWidth,$('vid').videoHeight);
+ const c=$('snap');if(c.width>10)return gLoad(c,c.width,c.height);
+ $('gOut').innerHTML='<div class="note">촬영 탭에서 카메라를 켜거나 사진 파일을 선택해 주세요.</div>';
+};
+$('gRe').onclick=()=>{if(GS.width)gRun()};
+function medianCols(m,w,h){const pts=[];for(let x=0;x<w;x++){const ys=[];for(let y=0;y<h;y++)if(m[y*w+x])ys.push(y);if(ys.length)pts.push([x,ys[ys.length>>1]])}return pts}
+function longestRun(pts,gap=4,sl=10){let best=[],cur=[];for(const p of pts){const l=cur[cur.length-1];if(l&&(p[0]-l[0]>gap||Math.abs(p[1]-l[1])>sl*(p[0]-l[0]))){if(cur.length>best.length)best=cur;cur=[]}cur.push(p)}return cur.length>best.length?cur:best}
+function gRun(){
+ if($('g_mode').value!=='seq')return gRunCmp();
+ const W=GS.width,H=GS.height,X0=Math.round(W*gv('x0')/100),X1=Math.round(W*gv('x1')/100),Y0=Math.round(H*gv('y0')/100),Y1=Math.round(H*gv('y1')/100),w=X1-X0,h=Y1-Y0;
+ if(w<20||h<20){$('gOut').textContent='영역 값을 확인하세요';return}
+ const d=GS.getContext('2d').getImageData(X0,Y0,w,h).data,n=w*h;
+ const M={red:new Uint8Array(n),yellow:new Uint8Array(n),green:new Uint8Array(n),purple:new Uint8Array(n)};
+ for(let i=0;i<n;i++){const r=d[i*4],g=d[i*4+1],b=d[i*4+2];
+  if(r>200&&g<90&&b<90)M.red[i]=1;
+  else if(r>210&&g>170&&b<90)M.yellow[i]=1;
+  else if(g>170&&r<150&&b<110)M.green[i]=1;
+  else if(r>150&&g>120&&b>210&&g<205&&r<235)M.purple[i]=1}
+ const zy=H*gv('zero')/100,ty=H*gv('top')/100,mx=gv('max'),val=y=>(zy-(y+Y0))/(zy-ty)*mx;
+ const names={red:['오늘(빨강)','#e4572e'],yellow:['1일 전(노랑)','#e0b000'],green:['2일 전(초록)','#2e8b57']};
+ const L=[],out=[];
+ for(const k of ['red','yellow','green']){
+  const r=longestRun(medianCols(M[k],w,h));
+  if(r.length<12){out.push(`${names[k][0]}: 선을 찾지 못했습니다`);continue}
+  const a=val(r[0][1]),b=val(r[r.length-1][1]),top=val(Math.min(...r.map(p=>p[1])));
+  out.push(`${names[k][0]}: ${fmt(a)} → ${fmt(b)}구슬 (최고 ${fmt(top)}, 하락 ${fmt(a-b)})`);
+  L.push({k,r,col:names[k][1]});
+ }
+ // 보라 상승 구간: 세로로 긴 열이 3열 이상 이어지는 곳
+ const J=[];let cur=[];
+ for(let x=0;x<w;x++){const ys=[];for(let y=0;y<h;y++)if(M.purple[y*w+x])ys.push(y);
+  if(ys.length&&ys[ys.length-1]-ys[0]>=20){const l=cur[cur.length-1];if(l&&x-l.x>6){if(cur.length>=3)J.push(cur);cur=[]}cur.push({x,ys})}}
+ if(cur.length>=3)J.push(cur);
+ const jumps=J.map(g=>{const ys=g.flatMap(c=>c.ys).sort((p,q)=>p-q);const hi=ys[Math.floor(ys.length*.05)],lo=ys[Math.floor(ys.length*.9)];return{x:g[0].x,hi,lo,rise:val(hi)-val(lo)}});
+ const lines=[...out];
+ lines.push(jumps.length?`연속 당첨 상승 ${jumps.length}회: `+jumps.map(j=>'+'+fmt(j.rise)).join(', ')+' (왼쪽부터)':'연속 당첨 상승 구간을 찾지 못했습니다');
+ const red=L.find(o=>o.k==='red');
+ if(red){const v=val(red.r[red.r.length-1][1]);lines.push(`오늘 선의 현재 위치는 약 ${fmt(v)}구슬로 0선보다 ${v>=0?'위':'아래'}입니다`)}
+ gLines=lines;
+ $('gOut').innerHTML=lines.map(t=>`<div class="tr"><div class="ko">${esc(t)}</div></div>`).join('');
+ // 미리보기
+ const c=$('gView'),sc=Math.min(1,840/W);c.width=W*sc;c.height=H*sc;c.style.display='block';
+ const x=c.getContext('2d');x.drawImage(GS,0,0,c.width,c.height);x.setLineDash([6,5]);x.strokeStyle='#fff';x.lineWidth=2;
+ x.strokeRect(X0*sc,Y0*sc,w*sc,h*sc);
+ x.strokeStyle='#00e5ff';[zy,ty].forEach(y=>{x.beginPath();x.moveTo(0,y*sc);x.lineTo(c.width,y*sc);x.stroke()});x.setLineDash([]);
+ L.forEach(o=>{x.strokeStyle='#000';x.lineWidth=7;x.beginPath();o.r.forEach((p,i)=>i?x.lineTo((p[0]+X0)*sc,(p[1]+Y0)*sc):x.moveTo((p[0]+X0)*sc,(p[1]+Y0)*sc));x.stroke();
+  x.strokeStyle=o.col;x.lineWidth=3;x.stroke()});
+ jumps.forEach(j=>{x.fillStyle='#b388ff';x.fillRect((j.x+X0)*sc-3,(j.hi+Y0)*sc,6,(j.lo-j.hi)*sc)});
+}
+
+const hsv=(r,g,b)=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){h=mx===r?((g-b)/d+6)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return[h,mx?d/mx:0,mx]};
+const hhmm=t=>{const m=Math.round(t*60);return String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+function gRunCmp(){
+ const W=GS.width,H=GS.height,X0=Math.round(W*gv('x0')/100),X1=Math.round(W*gv('x1')/100),Y0=Math.round(H*gv('y0')/100),Y1=Math.round(H*gv('y1')/100),w=X1-X0,h=Y1-Y0;
+ if(w<20||h<20){$('gOut').textContent='영역 값을 확인하세요';return}
+ const d=GS.getContext('2d').getImageData(X0,Y0,w,h).data,n=w*h;
+ const M={red:new Uint8Array(n),yellow:new Uint8Array(n),green:new Uint8Array(n)};
+ for(let i=0;i<n;i++){const[hh,ss,vv]=hsv(d[i*4],d[i*4+1],d[i*4+2]);
+  if((hh<=15||hh>=345)&&ss>.35&&vv>.7)M.red[i]=1;
+  else if(hh>=40&&hh<=75&&ss>.25&&vv>.75)M.yellow[i]=1;
+  else if(hh>=85&&hh<=165&&ss>.3&&vv>.7)M.green[i]=1}
+ const zeroAt=X=>H*(gv('zl')+(gv('zr')-gv('zl'))*X/W)/100,scAt=X=>H*(gv('sl')+(gv('sr')-gv('sl'))*X/W)/100,x9=W*gv('t0')/100,x23=W*gv('t1')/100;
+ const toV=(X,Y)=>(zeroAt(X)-Y)/scAt(X)*10000,day=$('g_mode').value==='day',toT=X=>day?(X-x9)/(x23-x9)*100:9+(X-x9)/(x23-x9)*14,lab=t=>day?Math.round(t)+'%':lab(t);
+ const names={red:['오늘(빨강)','#e4572e'],yellow:['1일 전(노랑)','#e0b000'],green:['2일 전(초록)','#2e8b57']};
+ const S={},lines=[];
+ for(const k of ['red','yellow','green']){
+  const r=longestRun(medianCols(M[k],w,h),10,12);
+  if(r.length<(day?40:10)){lines.push(`${names[k][0]}: 선을 찾지 못했습니다`);continue}
+  const P=r.map(p=>{const X=p[0]+X0,Y=p[1]+Y0;return{X,Y,v:toV(X,Y),t:toT(X)}});S[k]=P;
+  const pk=P.reduce((a,b)=>b.v>a.v?b:a),tr=P.reduce((a,b)=>b.v<a.v?b:a),e=P[P.length-1];
+  lines.push(`${names[k][0]}: ${lab(P[0].t)}~${lab(e.t)} / 최고 ${fmt(pk.v)}구슬(${lab(pk.t)}) / 최저 ${fmt(tr.v)}구슬(${lab(tr.t)}) / 마지막 ${fmt(e.v)}구슬(${lab(e.t)})`);
+ }
+ const at=(P,t)=>{let b=null;for(const p of P)if(Math.abs(p.t-t)<(day?8:.6)&&(!b||Math.abs(p.t-t)<Math.abs(b.t-t)))b=p;return b};
+ (day?[20,40,60,80]:[10,12,14,16,18]).forEach(t=>{const a=['yellow','green'].map(k=>{const p=S[k]&&at(S[k],t);return p?names[k][0].split('(')[0]+' '+fmt(p.v):null}).filter(Boolean);if(a.length)lines.push(`${day?'그래프 '+lab(t)+' 지점':lab(t)+' 시점'}: `+a.join(' / '))});
+ gLines=lines;
+ $('gOut').innerHTML=lines.map(t=>`<div class="tr"><div class="ko">${esc(t)}</div></div>`).join('')+'<div class="note">시간축이 없는 일별 그래프의 위치는 그래프 폭 기준 %입니다. 각도가 기울거나 노출이 과한 사진은 값이 크게 틀릴 수 있습니다. 미리보기에서 색 선이 실제 선과 겹치는지 확인하세요.</div>';
+ const c=$('gView'),sc=Math.min(1,840/W);c.width=W*sc;c.height=H*sc;c.style.display='block';
+ const x=c.getContext('2d');x.drawImage(GS,0,0,c.width,c.height);x.setLineDash([6,5]);x.strokeStyle='#fff';x.lineWidth=2;x.strokeRect(X0*sc,Y0*sc,w*sc,h*sc);
+ x.strokeStyle='#00e5ff';x.beginPath();x.moveTo(0,zeroAt(0)*sc);x.lineTo(c.width,zeroAt(W)*sc);x.stroke();x.setLineDash([]);
+ for(const k in S){x.strokeStyle='#000';x.lineWidth=7;x.beginPath();S[k].forEach((p,i)=>i?x.lineTo(p.X*sc,p.Y*sc):x.moveTo(p.X*sc,p.Y*sc));x.stroke();x.strokeStyle=names[k][1];x.lineWidth=3;x.stroke()}
+}
+const PRE={seq:{x0:5,x1:78,y0:29.5,y1:76},cmp:{x0:0,x1:93,y0:40,y1:73,zl:55.2,zr:47.8,sl:15.3,sr:14,t0:3.4,t1:83.4},day:{x0:53,x1:95,y0:46,y1:66,zl:45.3,zr:45.3,sl:8.3,sr:8.3,t0:48.1,t1:95}};
+$('g_mode').onchange=()=>{const m=$('g_mode').value;for(const k in PRE[m])$('g_'+k).value=PRE[m][k];if(GS.width)gRun()};
+$('gFill2').onclick=()=>{fill({ball:'91390'});document.querySelector('nav button[data-t="0"]').click();$('st').textContent='최고 출옥 값을 채웠습니다'};
+
+$('gSave').onclick=()=>{const no=$('g_no').value.trim();if(!no||!gLines.length)return alert('기계 번호를 입력하고 먼저 그래프를 분석해 주세요');
+ GR[no]=gLines;localStorage.setItem('pj_gr',JSON.stringify(GR));render();alert(no+'번 기계에 그래프 요약을 저장했습니다')};
+$('gFill').onclick=()=>{fill({hist:'247, 243, 307, 316, 535, 191, 241, 85, 151, 5, 239',ball:'63590'});document.querySelector('nav button[data-t="0"]').click();$('st').textContent='하단 표 값을 채웠습니다. 기계 번호를 넣고 저장하세요'};
+
+/* ---- 메뉴판 번역 ---- */
+const MENUD={"メニュー":"메뉴","本日のおすすめ":"오늘의 추천","おすすめ":"추천","定食":"정식","セット":"세트","ランチ":"런치","単品":"단품","大盛り":"곱빼기","大盛":"곱빼기","並盛":"보통","特盛":"특대","小盛":"작은 양","替え玉":"면 추가(카에다마)","味玉":"맛달걀","煮卵":"조림 달걀","半熟":"반숙","ラーメン":"라멘","つけ麺":"쓰케멘(찍어 먹는 면)","醤油":"간장","味噌":"된장(미소)","塩":"소금(시오)","とんこつ":"돈코츠","豚骨":"돈코츠","担々麺":"탄탄멘","うどん":"우동","そば":"소바","蕎麦":"메밀국수","親子丼":"오야코동(닭고기 달걀덮밥)","牛丼":"규동(소고기덮밥)","豚丼":"부타동(돼지고기덮밥)","カツ丼":"가츠동(돈가스덮밥)","天丼":"텐동(튀김덮밥)","海鮮丼":"카이센동(해산물덮밥)","丼":"덮밥","寿司":"초밥","握り":"니기리(손으로 쥔 초밥)","巻き":"말이(마키)","刺身":"회(사시미)","盛り合わせ":"모둠","天ぷら":"튀김(덴푸라)","唐揚げ":"가라아게(일본식 닭튀김)","から揚げ":"가라아게(일본식 닭튀김)","揚げ":"튀김","フライ":"튀김(프라이)","とんかつ":"돈가스","カツ":"커틀릿(돈가스)","焼き鳥":"야키토리(닭꼬치)","串":"꼬치","焼き":"구이","煮込み":"조림","鍋":"전골(나베)","すき焼き":"스키야키","しゃぶしゃぶ":"샤브샤브","お好み焼き":"오코노미야키","たこ焼き":"타코야키","餃子":"교자(만두)","焼きそば":"야키소바(볶음면)","炒飯":"볶음밥","チャーハン":"볶음밥","カレーライス":"카레라이스","カレー":"카레","オムライス":"오므라이스","ハンバーグ":"함박스테이크","ステーキ":"스테이크","サラダ":"샐러드","味噌汁":"된장국(미소시루)","スープ":"수프","ご飯":"밥","御飯":"밥","ライス":"밥","漬物":"절임 채소","枝豆":"풋콩(에다마메)","冷奴":"차가운 두부(히야얏코)","豆腐":"두부","玉子":"달걀","卵":"달걀","牛":"소고기","豚":"돼지고기","鶏":"닭고기","魚":"생선","海老":"새우","エビ":"새우","イカ":"오징어","タコ":"문어","蟹":"게","サーモン":"연어","鮭":"연어","マグロ":"참치","鮪":"참치","うなぎ":"장어","鰻":"장어","牡蠣":"굴","ホタテ":"가리비","野菜":"야채","キャベツ":"양배추","ネギ":"파","大根":"무","ニンニク":"마늘","生ビール":"생맥주","ビール":"맥주","ハイボール":"하이볼","チューハイ":"츄하이(소주 칵테일)","サワー":"사워(츄하이 종류)","日本酒":"사케","焼酎":"소주(쇼츄)","ワイン":"와인","ウーロン茶":"우롱차","緑茶":"녹차","お茶":"차","コーヒー":"커피","ジュース":"주스","コーラ":"콜라","水":"물","デザート":"디저트","アイス":"아이스(아이스크림)","飲み放題":"음료 무제한","食べ放題":"무한 리필","コース":"코스","追加":"추가","税込":"세금 포함","税抜":"세금 별도","限定":"한정","数量限定":"수량 한정","季節":"계절","辛口":"매운맛","甘口":"순한맛","一人前":"1인분","人前":"인분","お一人様":"1인당","円":"엔"};
+const YKG={
+'꼬치 부위·메뉴':[['焼き鳥','야키토리(닭꼬치)'],['焼鳥','야키토리(닭꼬치)'],['串焼き','꼬치구이'],['ねぎま','네기마(닭다리살·대파 꼬치)'],['ネギマ','네기마(닭다리살·대파 꼬치)'],['もも','닭다리살(모모)'],['せせり','목살(세세리)'],['ささみ','닭안심(사사미)'],['むね','닭가슴살'],['ぼんじり','꽁지살(본지리)'],['かわ','닭껍질(카와)'],['皮','껍질'],['鶏皮','닭껍질'],['レバー','간(레버)'],['肝','간(키모)'],['ハツ','염통(하츠)'],['砂肝','모래주머니(스나기모)'],['すなぎも','모래주머니(스나기모)'],['砂ずり','모래주머니(스나즈리)'],['月見','츠키미(날달걀 노른자 곁들임)'],['ズリ','모래주머니(즈리)'],['つくね','츠쿠네(닭고기 완자 꼬치)'],['月見つくね','츠키미 츠쿠네(노른자 곁들인 완자)'],['手羽先','닭날개(테바사키)'],['手羽元','닭 윗날개(테바모토)'],['手羽','닭날개'],['軟骨','연골(난코츠)'],['なんこつ','연골(난코츠)'],['膝軟骨','무릎 연골'],['若鶏','영계(와카도리)'],['親鶏','노계(오야도리, 쫄깃함)'],['地鶏','토종닭(지도리)'],['鶏肉','닭고기'],['鳥','닭'],['豚バラ','삼겹살(부타바라)'],['ベーコン巻き','베이컨말이'],['ホルモン','곱창·내장(호르몬)'],['ハラミ','안창살'],['牛タン','우설(소 혀)'],['タンメン','탄멘(야채 국수)'],['鶏わさ','토리와사(살짝 데친 닭회·와사비)'],['鶏刺し','닭회'],['ささみチーズ','닭안심 치즈'],['チーズ','치즈'],['明太','명란(멘타이)'],['大葉','깻잎(시소)'],['梅しそ','매실·시소(차조기)'],['梅','매실'],['うずらの卵','메추리알'],['うずら','메추리'],['串盛り','꼬치 모둠'],['串セット','꼬치 세트'],['本盛り','개 모둠(꼬치 수 기준)'],['本セット','개 세트'],['三種盛り','3종 모둠'],['五種盛り','5종 모둠'],['おまかせ串','주방장 추천 꼬치'],['おまかせ','오마카세(주방장 추천)']],
+'양념·소스':[['タレ','타레(달콤짭짤한 간장 소스)'],['たれ','타레(달콤짭짤한 간장 소스)'],['塩焼き','소금구이'],['塩だれ','소금 소스'],['旨塩','감칠맛 소금'],['味噌だれ','된장 소스'],['甘辛','달콤짭짤한'],['ゆず胡椒','유자 후추'],['柚子胡椒','유자 후추'],['柚子こしょう','유자 후추'],['柚子','유자'],['山椒','산초'],['七味','시치미(일곱 가지 향신 고춧가루)'],['わさび','와사비'],['辛子','겨자'],['からし','겨자'],['ポン酢','폰즈(감귤 간장)'],['レモン','레몬'],['大根おろし','간 무'],['おろし','간 무'],['味付け','양념 간'],['炭火焼','숯불구이'],['炭火','숯불'],['備長炭','비장탄(고급 숯)'],['炙り','겉만 살짝 구운']],
+'채소·곁들임':[['長ねぎ','대파'],['ねぎ','파'],['葱','파'],['玉ねぎ','양파'],['たまねぎ','양파'],['ししとう','꽈리고추(시시토)'],['ピーマン','피망'],['椎茸','표고버섯'],['しいたけ','표고버섯'],['エリンギ','새송이버섯'],['アスパラ','아스파라거스'],['プチトマト','방울토마토'],['トマト','토마토'],['なす','가지'],['茄子','가지'],['じゃがいも','감자'],['銀杏','은행'],['きゅうり','오이'],['浅漬け','겉절이(아사즈케)'],['焼きおにぎり','구운 주먹밥'],['おにぎり','주먹밥'],['お茶漬け','오차즈케(차 말이 밥)'],['鶏そば','닭 육수 국수'],['鶏白湯','닭 진국 육수(토리파이탄)'],['水炊き','미즈타키(닭 전골)'],['鶏天','닭튀김(토리텐)'],['チキン南蛮','치킨난반(타르타르 곁들인 닭튀김)']],
+'술·음료':[['瓶ビール','병맥주'],['中ジョッキ','맥주잔(중)'],['ジョッキ','맥주잔(저그)'],['角ハイ','가쿠 하이볼(위스키 소다)'],['ジンジャーハイボール','진저 하이볼'],['生レモンサワー','생레몬 사워'],['レモンサワー','레몬 사워'],['ウーロンハイ','우롱하이(우롱차+소주)'],['梅酒','매실주'],['熱燗','데운 사케(아츠칸)'],['冷酒','차게 한 사케(레이슈)'],['芋焼酎','고구마 소주'],['麦焼酎','보리 소주'],['ロック','온더록'],['水割り','물 탄 술(미즈와리)'],['お湯割り','따뜻한 물 탄 술(오유와리)'],['ソーダ割り','소다 탄 술'],['ノンアルコール','무알코올'],['ノンアル','무알코올']],
+'이자카야 용어':[['お通し','오토오시(기본 안주, 자릿세 성격)'],['突き出し','오토오시(기본 안주)'],['席料','자릿세'],['チャージ','자릿세'],['サービス料','봉사료'],['税別','세금 별도'],['個室','개별실'],['禁煙','금연'],['喫煙','흡연'],['ラストオーダー','주문 마감(라스트 오더)'],['売り切れ','품절'],['品切れ','품절'],['完売','품절(완판)'],['要予約','예약 필요'],['看板メニュー','대표 메뉴'],['名物','명물'],['一番人気','인기 1위'],['人気','인기'],['定番','기본 메뉴'],['日替わり','오늘의 메뉴(매일 바뀜)'],['手作り','수제'],['自家製','자가제'],['特製','특제'],['厚切り','두툼하게 썬']]
+};
+Object.values(YKG).forEach(a=>a.forEach(r=>{MENUD[r[0]]=r[1]}));
+const MK=Object.keys(MENUD).sort((a,b)=>b.length-a.length);
+const koMenu=t=>{let o=t;MK.forEach(k=>o=o.split(k).join(MENUD[k]));return o};
+/* ---- 음식점: 일본·태국·중국 메뉴판 번역 ---- */
+const mkDict=G=>{const d={};Object.values(G).forEach(a=>a.forEach(r=>{d[r[0]]=r[1]}));const ks=Object.keys(d).sort((a,b)=>b.length-a.length);return t=>{let o=t;ks.forEach(k=>o=o.split(k).join(d[k]));return o}};
+const THG={
+'요리':[['ผัดไทย','팟타이(쌀국수 볶음)'],['ต้มยำกุ้ง','똠얌꿍(새콤매콤 새우 수프)'],['ต้มยำ','똠얌(새콤매콤 수프)'],['ต้มข่าไก่','똠카가이(코코넛 닭 수프)'],['ส้มตำ','쏨땀(파파야 샐러드)'],['ข้าวผัด','볶음밥(카오팟)'],['ผัดกะเพรา','팟 끄라파오(바질 볶음)'],['ผัดกระเพรา','팟 끄라파오(바질 볶음)'],['ข้าวมันไก่','카오만가이(치킨라이스)'],['แกงเขียวหวาน','그린 커리'],['แกงแดง','레드 커리'],['แกงมัสมั่น','마사만 커리'],['แกงส้ม','깽쏨(새콤한 커리)'],['ลาบ','랍(다진 고기 무침)'],['น้ำตก','남똑(구운 고기 샐러드)'],['หมูปิ้ง','무삥(돼지고기 꼬치)'],['ไก่ย่าง','구운 닭(까이양)'],['ปลาเผา','생선 소금구이'],['ไข่เจียว','카이찌여우(태국식 오믈렛)'],['ผัดซีอิ๊ว','팟씨유(간장 볶음 면)'],['ก๋วยเตี๋ยว','꾸어이띠여우(쌀국수)'],['บะหมี่','바미(달걀 국수)'],['เส้นเล็ก','가는 쌀국수'],['เส้นใหญ่','넓은 쌀국수'],['หอยทอด','허이텃(굴·홍합 전)'],['ทอดมัน','텃만(어묵 튀김)'],['สะเต๊ะ','사테(꼬치구이)'],['ยำ','얌(새콤매콤 무침)'],['ข้าวเหนียวมะม่วง','망고 찹쌀밥'],['ข้าวเหนียว','찹쌀밥'],['ข้าว','밥']],
+'재료·조리':[['กุ้ง','새우'],['ปู','게'],['ปลาหมึก','오징어'],['ปลา','생선'],['หมู','돼지고기'],['ไก่','닭고기'],['เนื้อ','소고기'],['ไข่','달걀'],['เต้าหู้','두부'],['ผัก','채소'],['ผัด','볶음'],['ทอด','튀김'],['ย่าง','구이'],['นึ่ง','찜'],['ต้ม','끓임(수프)'],['แกง','커리·국'],['กะทิ','코코넛밀크'],['มะนาว','라임'],['น้ำปลา','피시소스'],['พริก','고추'],['ผักชี','고수'],['ถั่ว','땅콩·콩'],['มะม่วง','망고']],
+'맛·주문':[['ไม่เผ็ด','안 맵게'],['เผ็ดน้อย','덜 맵게'],['เผ็ดมาก','아주 맵게'],['เผ็ด','매운'],['หวาน','단'],['เปรี้ยว','신'],['เค็ม','짠'],['ไม่ใส่ผักชี','고수 빼고'],['ธรรมดา','보통'],['พิเศษ','특(곱빼기)'],['ห่อกลับบ้าน','포장'],['เมนูแนะนำ','추천 메뉴'],['แนะนำ','추천'],['เมนู','메뉴'],['ราคา','가격'],['บาท','바트'],['จาน','접시'],['ชุด','세트']],
+'음료·디저트':[['น้ำเปล่า','생수'],['น้ำมะพร้าว','코코넛 워터'],['น้ำอัดลม','탄산음료'],['เบียร์','맥주'],['ชาเย็น','차옌(타이 밀크티)'],['กาแฟ','커피'],['เครื่องดื่ม','음료'],['ของหวาน','디저트'],['ไอศกรีม','아이스크림'],['น้ำแข็ง','얼음'],['น้ำ','물']]};
+const ZHG={
+'요리':[['宫保鸡丁','궁바오지딩(땅콩 닭고기 볶음)'],['麻婆豆腐','마파두부'],['回锅肉','후이궈러우(삼겹살 볶음)'],['鱼香肉丝','위샹러우쓰(매콤새콤 고기채 볶음)'],['糖醋里脊','탕추리지(탕수육)'],['糖醋排骨','탕추파이구(탕수 갈비)'],['北京烤鸭','베이징 덕(오리구이)'],['红烧肉','홍샤오러우(간장 조림 삼겹살)'],['东坡肉','동파육'],['番茄炒蛋','토마토 달걀 볶음'],['小笼包','샤오룽바오(육즙 만두)'],['饺子','교자(만두)'],['馄饨','훈툰(완탕)'],['包子','바오쯔(찐빵)'],['炒饭','볶음밥'],['炒面','볶음면'],['拉面','라미엔(수타면)'],['牛肉面','우육면'],['担担面','탄탄면'],['云吞面','완탕면'],['火锅','훠궈(샤브샤브 전골)'],['麻辣烫','마라탕'],['羊肉串','양꼬치'],['烧烤','바비큐(꼬치구이)'],['凉菜','냉채'],['凉拌','무침'],['皮蛋','피단(삭힌 오리알)'],['粥','죽'],['米饭','밥'],['白饭','공기밥']],
+'재료·조리':[['猪肉','돼지고기'],['牛肉','소고기'],['羊肉','양고기'],['鸡肉','닭고기'],['鸡蛋','달걀'],['豆腐','두부'],['青菜','청경채·채소'],['白菜','배추'],['茄子','가지'],['土豆','감자'],['西红柿','토마토'],['虾','새우'],['蟹','게'],['鱼','생선'],['鸭','오리'],['鸡','닭'],['蒸','찜'],['炒','볶음'],['炸','튀김'],['烤','구이'],['煮','삶음'],['汤','탕(국)'],['串','꼬치'],['花生','땅콩'],['香菜','고수']],
+'맛·주문':[['不要香菜','고수 빼 주세요'],['微辣','약간 맵게'],['中辣','보통 맵게'],['特辣','아주 맵게'],['不辣','안 맵게'],['辣','매운'],['麻','얼얼한(마라 맛)'],['酸','신'],['甜','단'],['咸','짠'],['小份','작은 양'],['大份','큰 양'],['招牌','대표 메뉴'],['推荐','추천'],['套餐','세트'],['菜单','메뉴'],['价格','가격'],['打包','포장'],['堂食','매장 식사'],['免费','무료'],['加','추가']],
+'음료·단위':[['啤酒','맥주'],['白酒','바이주(독한 증류주)'],['奶茶','밀크티'],['可乐','콜라'],['矿泉水','생수'],['饮料','음료'],['甜点','디저트'],['茶','차'],['元','위안'],['块','위안(구어)'],['份','인분·접시']]};
+const ykSet=new Set(Object.values(YKG).flatMap(a=>a.map(r=>r[0])));
+const JG=Object.assign({'일반 일식 메뉴':Object.entries(MENUD).filter(([k])=>!ykSet.has(k))},YKG);
+const FOOD={
+ ja:{name:'일본 음식',ocr:'jpn+eng',src:'ja',script:/[\u3040-\u30ff\u4e00-\u9fff]|\d{3}/,dict:koMenu,cur:'엔',rate:900,per:100,price:/[¥￥]\s*([\d,]{2,6})|([\d,]{2,6})\s*円/,guide:JG},
+ th:{name:'태국 음식',ocr:'tha+eng',src:'th',script:/[\u0e00-\u0e7f]|\d{2,}/,dict:mkDict(THG),cur:'바트',rate:40,per:1,price:/฿\s*([\d,]{2,5})|([\d,]{2,5})\s*(?:บาท|฿|THB)/,guide:THG},
+ zh:{name:'중국 음식',ocr:'chi_sim+eng',src:'zh-CN',script:/[\u4e00-\u9fff]|\d{2,}/,dict:mkDict(ZHG),cur:'위안',rate:190,per:1,price:/[¥￥]\s*([\d,]{1,5})|([\d,]{1,5})\s*(?:元|块|圆|RMB)/,guide:ZHG}};
+let FC='ja',mOrig=null,mItems=[],mShow=true;
+function foodSet(c){
+ FC=c;const cfg=FOOD[c];
+ document.querySelectorAll('#foodSeg button').forEach(b=>b.classList.toggle('on2',b.dataset.c===c));
+ $('mTitle').textContent=cfg.name+' 메뉴판 번역';$('ykTitle').textContent=cfg.name+' 용어 도움말';
+ $('m_rateL').textContent='환율 ('+cfg.per+cfg.cur+'당 원, 직접 확인해서 입력)';$('m_rate').value=cfg.rate;
+ $('ykBox').innerHTML=Object.entries(cfg.guide).map(([k,v],i)=>`<details${i===0?' open':''}><summary style="font-weight:700">${k} <span class="note">(${v.length})</span></summary><table>${v.map(r=>`<tr><td>${r[0]}</td><td style="color:var(--ink)">${r[1]}</td></tr>`).join('')}</table></details>`).join('');
+ $('mCard').style.display='none';mOrig=null;mItems=[];$('mList').innerHTML='번역 결과가 여기에 표시됩니다.';$('mSt').textContent='사진을 선택하세요';
+}
+document.querySelectorAll('#foodSeg button').forEach(b=>b.onclick=()=>foodSet(b.dataset.c));
+function mDraw(){
+ const c=$('mView');if(!mOrig)return;c.width=mOrig.width;c.height=mOrig.height;
+ const x=c.getContext('2d');x.drawImage(mOrig,0,0);if(!mShow)return;
+ mItems.forEach(it=>{
+  const{x0,y0,x1,y1}=it.b,w=x1-x0,h=y1-y0,t=it.ko+(it.won?' (약 '+it.won.toLocaleString('ko-KR')+'원)':'');
+  let fs=Math.max(10,h*.8);x.font='700 '+fs+'px "Noto Sans KR",sans-serif';
+  while(x.measureText(t).width>w+40&&fs>9){fs-=1;x.font='700 '+fs+'px "Noto Sans KR",sans-serif'}
+  x.fillStyle='rgba(10,14,32,.88)';x.fillRect(x0-3,y0-2,Math.max(w,x.measureText(t).width)+8,h+4);
+  x.fillStyle='#fff';x.textBaseline='middle';x.fillText(t,x0,y0+h/2);
+ });
+}
+async function mRun(src){
+ const cfg=FOOD[FC];
+ if(busy){$('mSt').textContent='다른 인식이 진행 중입니다. 잠시 후 다시 시도하세요';return}
+ busy=true;
+ try{
+  if(typeof Tesseract==='undefined')throw new Error('OCR 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하세요');
+  const sc=Math.min(1,1600/src.width),w=document.createElement('canvas');w.width=Math.round(src.width*sc);w.height=Math.round(src.height*sc);
+  w.getContext('2d').drawImage(src,0,0,w.width,w.height);
+  $('mSt').textContent='글자를 읽는 중입니다 (처음 쓰는 언어는 데이터를 받느라 오래 걸립니다)';
+  const r=await (await getWorker(cfg.ocr)).recognize(w);
+  const L=(r.data.lines||(r.data.blocks||[]).flatMap(b=>(b.paragraphs||[]).flatMap(p=>p.lines||[]))).filter(l=>l.text&&l.confidence>35&&cfg.script.test(l.text));
+  if(!L.length){$('mSt').textContent='읽은 글자가 없습니다. 더 가까이서 밝게 찍어 보세요';busy=false;return}
+  const ja=L.map(l=>l.text.replace(/(?<=[\u3040-\u30ff\u4e00-\u9fff])\s+(?=[\u3040-\u30ff\u4e00-\u9fff])/g,'').trim());
+  $('mSt').textContent='번역 중입니다';
+  const ko=await translate(ja,cfg.dict,cfg.src),rate=parseFloat($('m_rate').value)||cfg.rate;
+  mItems=L.map((l,i)=>{const m=ja[i].match(cfg.price),amt=m?parseInt((m[1]||m[2]).replace(/,/g,''),10):null;
+   return{b:l.bbox,ja:ja[i],ko:ko[i],yen:amt,won:amt?Math.round(amt*rate/cfg.per/10)*10:null}});
+  mOrig=w;mShow=true;$('mToggle').textContent='원본 보기';$('mCard').style.display='block';mDraw();
+  $('mList').innerHTML=mItems.map(it=>`<div class="tr"><div class="ja">${esc(it.ja)}</div><div class="ko">${esc(it.ko)}</div>${it.won?`<div class="note">${it.yen.toLocaleString('ko-KR')}${cfg.cur} ≈ ${it.won.toLocaleString('ko-KR')}원 (환율 ${cfg.per}${cfg.cur}당 ${rate}원)</div>`:''}</div>`).join('');
+  $('mSt').textContent='완료: '+mItems.length+'줄을 읽었습니다 (신뢰도 '+Math.round(r.data.confidence)+'%)';
+ }catch(e){$('mSt').textContent='오류: '+e.message}
+ busy=false;
+}
+$('mFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);mRun(c)};im.src=URL.createObjectURL(f)};
+$('mCam').onclick=()=>{const v=$('vid');if(!stream||!v.videoWidth){$('mSt').textContent='카메라를 먼저 켜 주세요(게임 > 촬영). 또는 위에서 사진을 선택하세요';return}
+ const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);mRun(c)};
+$('mToggle').onclick=()=>{mShow=!mShow;$('mToggle').textContent=mShow?'원본 보기':'번역 덮어쓰기';mDraw()};
+
+/* ---- 실시간 대화: 일본어·영어·중국어 ↔ 한국어 (시작 버튼 하나) ---- */
+const LANGS={
+ ja:{name:'日本語',badge:'JA',sr:'ja-JP',g:'ja',c:'ja',m:'ja',hint:'会話が始まると、相手の言葉がここに日本語で表示されます。',turn:'● どうぞ',pend:'翻訳中…'},
+ en:{name:'English',badge:'EN',sr:'en-US',g:'en',c:'en',m:'en',hint:"When the conversation starts, the other person's words appear here in English.",turn:'● Please speak',pend:'Translating…'},
+ zh:{name:'中文',badge:'ZH',sr:'zh-CN',g:'zh-CN',c:'zh',m:'zh-CN',hint:'开始对话后，对方的话会以中文显示在这里。',turn:'● 请说话',pend:'翻译中…'}};
+const KO={name:'한국어',badge:'KO',sr:'ko-KR',g:'ko',c:'ko',m:'ko',hint:'대화를 시작하면 상대의 말이 여기에 한국어로 표시됩니다.',turn:'● 말하세요',pend:'번역 중…'};
+const CV={msgs:[],on:false,mode:'',turn:'ko',fl:'ja',rec:null,stream:null,ac:null,raf:0,speaking:false,stt:'',trE:''},TRC={};
+const LG=side=>side==='ko'?KO:LANGS[CV.fl];
+function cvBuild(side,el){
+ const S=LG(side);
+ el.innerHTML=`<div class="cvh"><span><i>${S.badge}</i>${S.name}</span><span class="note" id="cv_st_${side}"></span></div><div class="cvm" id="cv_m_${side}"></div><div class="cvi" id="cv_i_${side}"></div>`;
+ el.querySelector('.cvh').onclick=()=>{if(CV.on&&CV.mode==='alt'&&CV.turn!==side){CV.turn=side;if(CV.rec)CV.rec.abort()}};
+}
+function cvRender(){
+ ['fl','ko'].forEach(X=>{
+  const box=$('cv_m_'+X),S=LG(X);
+  if(!CV.msgs.length){box.innerHTML=`<div class="note" style="margin:auto;text-align:center;padding:0 16px">${S.hint}</div>`;return}
+  box.innerHTML=CV.msgs.map(m=>{
+   const own=m.from===X,main=m[X]||(m.err?'':S.pend);
+   const sm=X==='ko'?(own?(m.fl?'상대 화면: '+m.fl:''):(m.fl||'')):'';
+   return`<div class="bub${own?' me':''}"><div class="big">${esc(main)}</div>${sm?`<div class="sm">${esc(sm)}</div>`:''}${m.err?`<div class="sm" style="color:#ff8c80">${esc(m.err)}</div>`:''}</div>`;
+  }).join('');
+  box.scrollTop=box.scrollHeight;
+ });
+}
+function cvReset(){cvBuild('fl',$('cvTop'));cvBuild('ko',$('cvBot'));cvRender()}
+cvReset();
+const fetchT=(u,o)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);return fetch(u,Object.assign({},o,{signal:c.signal})).finally(()=>clearTimeout(t))};
+async function cvTr(text,fs,ts){
+ const F=LG(fs),T=LG(ts);
+ if(apiKey){
+  const r=await fetchT('https://translation.googleapis.com/language/translate/v2?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:[text],source:F.g,target:T.g,format:'text'})});
+  const j=await r.json();if(j.error)throw new Error(j.error.message);
+  return{text:j.data.translations[0].translatedText,engine:'Google Cloud Translation'};
+ }
+ if('Translator' in self){
+  try{const k=F.c+T.c;
+   if(!TRC[k]){const av=await Translator.availability({sourceLanguage:F.c,targetLanguage:T.c});if(av!=='unavailable')TRC[k]=await Translator.create({sourceLanguage:F.c,targetLanguage:T.c})}
+   if(TRC[k])return{text:await TRC[k].translate(text),engine:'Chrome 내장 번역(기기 안에서 처리)'};
+  }catch(e){}
+ }
+ const r=await fetchT('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair='+F.m+'|'+T.m);
+ const j=await r.json();let t=j.responseData&&j.responseData.translatedText;
+ if(!t||/MYMEMORY WARNING|QUERY LENGTH/i.test(t))throw new Error('무료 번역 한도를 넘었거나 응답이 없습니다');
+ const d=document.createElement('textarea');d.innerHTML=t;return{text:d.value,engine:'MyMemory(무료, 품질 낮을 수 있음)'};
+}
+function cvSpeak(t,side){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=LG(side).sr;CV.speaking=true;u.onend=u.onerror=()=>{CV.speaking=false};speechSynthesis.speak(u)}catch(e){CV.speaking=false}}
+function cvEng(){$('cv_eng').textContent='음성 인식: '+(CV.stt||'-')+(CV.trE?' · 번역: '+CV.trE:'')}
+async function cvSend(side,text){
+ text=(text||'').trim();if(!text)return;
+ const o=side==='ko'?'fl':'ko',m={from:side};m[side]=text;m[o]=null;CV.msgs.push(m);cvRender();
+ try{const r=await cvTr(text,side,o);m[o]=r.text;CV.trE=r.engine;cvEng()}
+ catch(e){m.err='번역 실패: '+(e.name==='AbortError'?'응답 시간 초과':e.message)+' (인터넷 연결이나 API 키를 확인하세요)'}
+ cvRender();
+ if($('cv_tts').checked&&m[o])cvSpeak(m[o],o);
+}
+const cvStatus=(k,t)=>{$('cv_st_'+k).textContent=t;$('cv_st_'+k).className='note'+(t?' on':'')};
+const cvInterim=(k,t)=>{$('cv_i_'+k).textContent=t};
+function cvAltStart(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome이나 Edge를 사용하세요.');return cvStop()}
+ CV.mode='alt';CV.turn='ko';CV.stt='브라우저 음성 인식(번갈아 말하기)';cvEng();
+ const run=()=>{
+  if(!CV.on)return;
+  if(CV.speaking){setTimeout(run,300);return}
+  const side=CV.turn,other=side==='ko'?'fl':'ko';
+  cvStatus(side,LG(side).turn);cvStatus(other,'');cvInterim(other,'');
+  const r=new SR();r.lang=LG(side).sr;r.interimResults=true;r.continuous=false;let fin='';
+  r.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else it+=t}cvInterim(side,fin+it)};
+  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){alert('마이크 권한이 막혀 있습니다. 허용한 뒤 다시 시작하세요.');cvStop()}};
+  r.onend=()=>{cvInterim(side,'');const t=fin.trim();if(t){cvSend(side,t);CV.turn=other}if(CV.on)setTimeout(run,150)};
+  CV.rec=r;try{r.start()}catch(e){setTimeout(run,500)}
+ };
+ run();
+}
+async function cvCloudStart(){
+ CV.mode='cloud';CV.stt='Google 음성 인식(언어 자동 감지)';cvEng();
+ try{CV.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}
+ catch(e){alert('마이크 권한을 허용해 주세요');return cvStop()}
+ const mime=['audio/webm;codecs=opus','audio/ogg;codecs=opus'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m));
+ if(!mime){alert('이 브라우저는 음성 녹음을 지원하지 않습니다. Chrome이나 Edge를 사용하세요.');return cvStop()}
+ const ac=CV.ac=new (window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();an.fftSize=1024;ac.createMediaStreamSource(CV.stream).connect(an);
+ const buf=new Float32Array(an.fftSize);let rec=null,chunks=[],speaking=false,lastV=0,startT=0,noise=.01;
+ cvStatus('ko','● 듣는 중');cvStatus('fl','● '+(CV.fl==='ja'?'聞いています':CV.fl==='zh'?'正在聆听':'Listening'));
+ const tick=()=>{
+  if(!CV.on)return;
+  an.getFloatTimeDomainData(buf);let sum=0;for(const v of buf)sum+=v*v;const rms=Math.sqrt(sum/buf.length),now=performance.now();
+  if(!speaking)noise=noise*.95+rms*.05;
+  const th=Math.max(.02,noise*3);
+  if(!CV.speaking&&rms>th){
+   lastV=now;
+   if(!speaking){speaking=true;startT=now;chunks=[];rec=new MediaRecorder(CV.stream,{mimeType:mime});
+    rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    rec.onstop=async()=>{if(performance.now()-startT<600||!chunks.length)return;await cvCloudRecognize(new Blob(chunks,{type:mime}),mime)};
+    rec.start();cvInterim('ko','듣는 중…');cvInterim('fl','…')}
+  }else if(speaking&&(now-lastV>800||now-startT>20000)){speaking=false;if(rec&&rec.state!=='inactive')rec.stop();cvInterim('ko','');cvInterim('fl','')}
+  CV.raf=requestAnimationFrame(tick);
+ };
+ tick();
+}
+async function cvCloudRecognize(blob,mime){
+ try{
+  const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(',')[1]);fr.readAsDataURL(blob)});
+  const r=await fetchT('https://speech.googleapis.com/v1/speech:recognize?key='+encodeURIComponent(apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({config:{encoding:mime.includes('ogg')?'OGG_OPUS':'WEBM_OPUS',sampleRateHertz:48000,audioChannelCount:1,languageCode:'ko-KR',alternativeLanguageCodes:[LANGS[CV.fl].sr],enableAutomaticPunctuation:true},audio:{content:b64}})});
+  const j=await r.json();if(j.error)throw new Error(j.error.message);
+  const res=(j.results||[])[0];if(!res||!res.alternatives||!res.alternatives[0].transcript)return;
+  cvSend(/^ko/i.test(res.languageCode||'')?'ko':'fl',res.alternatives[0].transcript);
+ }catch(e){$('cv_eng').textContent='음성 인식 오류: '+(e.name==='AbortError'?'응답 시간 초과':e.message)+' (Speech-to-Text API가 켜져 있는지 확인하세요)'}
+}
+function cvStop(){
+ CV.on=false;cancelAnimationFrame(CV.raf);
+ if(CV.rec){try{CV.rec.abort()}catch(e){}CV.rec=null}
+ if(CV.stream){CV.stream.getTracks().forEach(t=>t.stop());CV.stream=null}
+ if(CV.ac){try{CV.ac.close()}catch(e){}CV.ac=null}
+ try{speechSynthesis.cancel()}catch(e){}
+ ['ko','fl'].forEach(k=>{cvStatus(k,'');cvInterim(k,'')});
+ $('cv_go').textContent='대화 시작';$('cv_go').classList.remove('d');
+}
+$('cv_go').onclick=()=>{
+ if(CV.on)return cvStop();
+ CV.on=true;$('cv_go').textContent='대화 중지';$('cv_go').classList.add('d');
+ apiKey?cvCloudStart():cvAltStart();
+};
+$('cv_lang').onchange=e=>{if(CV.on)cvStop();CV.fl=e.target.value;CV.msgs=[];cvReset();$('cv_eng').textContent='상대 언어를 '+LANGS[CV.fl].name+'로 바꿨습니다'};
+$('cv_flip').onclick=()=>{const f=$('cvTop').classList.toggle('flip');$('cv_flip').textContent='위쪽 뒤집기 '+(f?'켬':'끔');$('cv_flip').classList.toggle('on',f)};
+$('cv_clr').onclick=()=>{CV.msgs=[];cvRender()};
+
+/* ---- 메인 화면 이동 ---- */
+const PG={home:'통역 · 음식점 · 게임',chat:'실시간 대화',food:'음식점 메뉴판 번역',game:'게임 · 파칭코'};
+let gameTab=0;
+function showTab(i){
+ document.querySelectorAll('.tab').forEach((t,k)=>t.classList.toggle('on',k===i));
+ document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',+x.dataset.t===i));
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{gameTab=+b.dataset.t;showTab(gameTab);render();window.scrollTo(0,0)});
+function go(pg,fromPop){
+ if(pg!=='game'&&AUTO.on)$('autoBtn').click();
+ if(pg!=='chat'&&CV.on)cvStop();
+ document.body.dataset.page=pg;$('backBtn').style.display=pg==='home'?'none':'grid';$('hSub').textContent=PG[pg];
+ showTab(pg==='game'?gameTab:pg==='chat'?8:pg==='food'?7:-1);
+ if(pg==='game')render();if(pg==='food')foodSet(FC);
+ window.scrollTo(0,0);
+ if(!fromPop){try{history.pushState({pg},'')}catch(e){}}
+}
+window.addEventListener('popstate',e=>go((e.state&&e.state.pg)||'home',true));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+$('backBtn').onclick=()=>{if(history.state&&history.state.pg&&history.state.pg!=='home')history.back();else go('home',true)};
+let dip=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('installBtn').style.display='block'});
+$('installBtn').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('installBtn').style.display='none'};
+
+$('dq').oninput=dictRender;dictRender();render();go('home',true);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
